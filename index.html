@@ -1,1025 +1,1590 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新北市自主學習季報 2026 秋季號｜在 AI 的速度裡，守住學習的深度</title>
+  <title>新北市國高中交通車稽查統計平台</title>
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter & Noto Sans TC -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
-  <!-- Phosphor Icons for clean visual cues -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
-            serif: ['"Noto Serif TC"', 'Georgia', 'serif'],
-          },
           colors: {
             brand: {
-              50: '#FDF8F5',
-              100: '#F9ECE5',
-              200: '#F3DACD',
-              600: '#B85028',
-              700: '#943B18',
-              800: '#752D12',
-              900: '#521D09',
-            },
-            forest: {
-              600: '#2E6F56',
-              700: '#20513E',
-              800: '#15382A',
-            },
-            warmgray: {
-              50: '#FAF8F5',
-              100: '#F3EFE9',
-              200: '#E5DFD5',
-              700: '#4A463F',
-              800: '#2E2B27',
-              900: '#1C1A17',
+              50: '#f0f7ff',
+              100: '#e0effe',
+              200: '#bae0fd',
+              300: '#7cc7fb',
+              400: '#38a9f8',
+              500: '#0e8ce9',
+              600: '#026fc7',
+              700: '#0358a1',
+              800: '#074b83',
+              900: '#0b3f6f',
+              950: '#07284a',
             }
           }
         }
       }
     }
   </script>
-
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    /* 閱讀模式樣式定義 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
     body {
-      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-      transition: background-color 0.25s ease, color 0.25s ease;
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
     }
-    .theme-paper {
-      background-color: #F8F5EE !important;
-      color: #24221F !important;
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    .theme-paper .card-bg {
-      background-color: #FFFFFF !important;
-      border-color: #E6DFC8 !important;
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
     }
-    /* 重點摘要高亮模式效果 */
-    .summary-active .detail-paragraph {
-      display: none !important;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
     }
-    .summary-active .key-callout {
-      border-width: 2px !important;
-      background-color: #FEF3C7 !important;
-      border-color: #D97706 !important;
-      transform: scale(1.01);
-      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.15) !important;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
-    .reading-progress-bar {
-      height: 4px;
-      width: 0%;
-      background: linear-gradient(90deg, #B85028, #2E6F56);
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 100;
-      transition: width 0.1s;
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
     }
   </style>
 </head>
-<body class="bg-[#FBF9F6] text-warmgray-900 antialiased selection:bg-brand-200 selection:text-brand-900 font-sans">
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
 
-  <!-- 頂部閱讀進度指示條 -->
-  <div id="progressBar" class="reading-progress-bar"></div>
-
-  <!-- 全局導航列 -->
-  <header class="sticky top-0 z-50 bg-[#FBF9F6]/95 backdrop-blur-md border-b border-warmgray-200 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo 與期刊標示 -->
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold shadow-md shadow-brand-600/20">
-            <span class="text-lg">NT</span>
+  <!-- 頂部政府風格導覽列 -->
+  <header class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 text-white shadow-md sticky top-0 z-40 border-b border-brand-600">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-20">
+        
+        <div class="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer min-w-0 flex-1 mr-2" onclick="switchTab('inspection')">
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white shadow-inner flex-shrink-0">
+            <i class="fa-solid fa-bus-simple text-base sm:text-2xl text-cyan-300"></i>
           </div>
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="font-bold text-warmgray-900 text-base sm:text-lg tracking-tight">自主學習季刊</span>
-              <span class="bg-brand-100 text-brand-800 text-xs px-2 py-0.5 rounded-full font-bold">2026 秋季號</span>
+          <div class="min-w-0 flex-1">
+            <div class="hidden sm:flex items-center space-x-2 mb-1">
+              <span class="text-xs uppercase tracking-wider font-semibold text-brand-200 bg-brand-950/40 px-2 py-0.5 rounded-full border border-white/10">新北市政府教育局</span>
+              <button type="button" onclick="openCloudSyncModal(); event.stopPropagation();" class="text-xs px-2.5 py-0.5 rounded-full border border-cyan-400/30 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-200 flex items-center space-x-1.5 transition shadow-sm">
+                <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="cloudStatusText" class="font-medium">雲端試算表連線中</span>
+                <i class="fa-solid fa-cloud-arrow-down text-[10px] ml-0.5"></i>
+              </button>
+              <button type="button" onclick="toggleManagerMode(); event.stopPropagation();" id="navManagerBtn" class="text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 bg-amber-950/40 hover:bg-amber-900/60 text-amber-200 flex items-center space-x-1.5 transition shadow-sm">
+                <i class="fa-solid fa-user-pen text-[11px] text-amber-300"></i>
+                <span id="navManagerText" class="font-medium">承辦人管理權限</span>
+              </button>
             </div>
-            <p class="text-xs text-warmgray-700 hidden sm:block">新北市政府教育局・NTSRL 國中自主學習工作圈</p>
+            <div class="sm:hidden text-[10px] font-semibold text-brand-200 tracking-wider flex items-center space-x-1 leading-none mb-0.5">
+              <span>新北市教育局</span>
+              <span class="text-cyan-300">•</span>
+              <span class="text-cyan-200">交通車稽查</span>
+            </div>
+            <h1 class="text-sm sm:text-xl font-bold tracking-tight text-white truncate leading-tight">
+              新北市國高中交通車稽查統計平台
+            </h1>
           </div>
         </div>
 
-        <!-- 導航功能按鈕組 -->
-        <div class="flex items-center space-x-2 sm:space-x-3">
-          <!-- 重點速讀切換鈕 -->
-          <button id="toggleSummaryBtn" onclick="toggleSummaryMode()" 
-            class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shadow-sm"
-            title="一鍵過濾冗長細節，只看核心結論與實踐要點">
-            <i class="ph-bold ph-lightning text-amber-600"></i>
-            <span id="summaryBtnText">重點速讀模式</span>
+        <!-- 桌面端導航分頁 -->
+        <nav class="hidden md:flex space-x-1 lg:space-x-2 flex-shrink-0">
+          <button id="nav-btn-inspection" onclick="switchTab('inspection')" class="nav-item px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center space-x-2 bg-white/15 text-white shadow-sm">
+            <i class="fa-solid fa-clipboard-check text-cyan-300"></i>
+            <span>即時稽查</span>
           </button>
-
-          <!-- 護眼模式切換鈕 -->
-          <button id="themeToggleBtn" onclick="togglePaperTheme()" 
-            class="p-2 rounded-full border border-warmgray-200 bg-white hover:bg-warmgray-100 text-warmgray-700 transition"
-            title="切換溫潤米紙護眼色調">
-            <i class="ph-bold ph-sun-dim text-lg"></i>
+          <button id="nav-btn-dashboard" onclick="switchTab('dashboard')" class="nav-item px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center space-x-2 text-brand-100 hover:bg-white/10 hover:text-white">
+            <i class="fa-solid fa-chart-pie text-cyan-300"></i>
+            <span>數據儀表板</span>
           </button>
+          <button id="nav-btn-statistics" onclick="switchTab('statistics')" class="nav-item px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center space-x-2 text-brand-100 hover:bg-white/10 hover:text-white">
+            <i class="fa-solid fa-table-list text-cyan-300"></i>
+            <span>資料統計及下載</span>
+          </button>
+          <button id="nav-btn-regulations" onclick="switchTab('regulations')" class="nav-item px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center space-x-2 text-brand-100 hover:bg-white/10 hover:text-white">
+            <i class="fa-solid fa-scale-balanced text-cyan-300"></i>
+            <span>法規查詢</span>
+          </button>
+        </nav>
 
-          <!-- 快速跳轉目錄選單按鈕 (手機版漢堡) -->
-          <button onclick="toggleMobileNav()" class="p-2 md:hidden rounded-lg border border-warmgray-200 text-warmgray-700">
-            <i class="ph-bold ph-list text-xl"></i>
+        <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
+          <div class="hidden xl:block text-right text-xs text-brand-200">
+            <div id="liveClock" class="font-mono font-medium">2026/11/06 (五) 14:22</div>
+            <div class="text-brand-300">聯合稽查專責小組</div>
+          </div>
+
+          <button type="button" onclick="openCloudSyncModal()" class="sm:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-cyan-300 transition relative" title="雲端試算表連線">
+            <span id="cloudStatusDotMobile" class="w-2 h-2 rounded-full bg-emerald-400 absolute top-1.5 right-1.5 animate-pulse"></span>
+            <i class="fa-solid fa-cloud text-xs"></i>
+          </button>
+          <button type="button" onclick="toggleManagerMode()" id="navManagerBtnMobile" class="sm:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 transition" title="承辦人管理模式">
+            <i class="fa-solid fa-user-pen text-xs"></i>
+          </button>
+          <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white focus:outline-none" aria-label="切換選單">
+            <i class="fa-solid fa-bars text-sm sm:text-base"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 頂端導航錨點 (桌機版快速跳轉) -->
-    <div class="hidden md:block bg-white/70 border-t border-warmgray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex space-x-6 py-2.5 text-xs lg:text-sm font-medium text-warmgray-700 overflow-x-auto whitespace-nowrap">
-          <a href="#editor-note" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-pen-nib"></i><span>主編導讀</span>
-          </a>
-          <a href="#deep-report" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-brain"></i><span>主題報導：邊界與共振</span>
-          </a>
-          <a href="#teachers-hub" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-chalkboard-teacher"></i><span>課堂社群實踐</span>
-          </a>
-          <a href="#partners" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-handshake"></i><span>入校協作知音</span>
-          </a>
-          <a href="#students-voice" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-chats-circle"></i><span>青聽學習 (學生心聲)</span>
-          </a>
-          <a href="#ai-agent" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-robot"></i><span>新知：AI Agent 轉化</span>
-          </a>
-          <a href="#book-recommend" class="hover:text-brand-600 transition flex items-center space-x-1">
-            <i class="ph-bold ph-book-open-text"></i><span>13把關鍵鑰匙</span>
-          </a>
-        </nav>
+    <!-- 行動端選單面板 -->
+    <div id="mobileMenu" class="md:hidden hidden bg-brand-950/98 border-t border-brand-700 px-4 pt-3 pb-4 space-y-2 shadow-2xl">
+      <div class="grid grid-cols-2 gap-2 pb-2 mb-2 border-b border-brand-800 text-[11px]">
+        <button onclick="openCloudSyncModal(); toggleMobileMenu()" class="p-2.5 rounded-lg bg-brand-900 border border-brand-700 text-left flex items-center space-x-2 text-cyan-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-medium truncate">雲端試算表連線</span>
+        </button>
+        <button onclick="toggleManagerMode(); toggleMobileMenu()" class="p-2.5 rounded-lg bg-brand-900 border border-brand-700 text-left flex items-center space-x-2 text-amber-200">
+          <i class="fa-solid fa-user-pen text-amber-300 text-xs"></i>
+          <span class="font-medium truncate">承辦人管理權限</span>
+        </button>
       </div>
-    </div>
 
-    <!-- 手機版展開選單 -->
-    <div id="mobileNav" class="hidden md:hidden bg-white border-b border-warmgray-200 px-4 py-3 space-y-2 text-sm">
-      <a href="#editor-note" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">主編的話：守住學習的深度</a>
-      <a href="#deep-report" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">主題報導：邊界與共振 (洪詠善)</a>
-      <a href="#teachers-hub" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">課堂社群交流站 (石門/福和/生活科技)</a>
-      <a href="#partners" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">協作知音：入校陪伴四階段 (張堯卿)</a>
-      <a href="#students-voice" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">青聽學習：國中小學生的 AI 與自我實踐</a>
-      <a href="#ai-agent" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">新知：生成式 AI 從「會回答」到「會辦事」</a>
-      <a href="#book-recommend" onclick="toggleMobileNav()" class="block py-2 text-warmgray-800 font-medium">活動與專書推薦：13把自主學習鑰匙</a>
+      <button onclick="switchTab('inspection'); toggleMobileMenu()" class="mobile-nav-item w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center space-x-3 text-white bg-white/10">
+        <i class="fa-solid fa-clipboard-check text-cyan-300 w-5"></i>
+        <span>即時稽查</span>
+      </button>
+      <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="mobile-nav-item w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center space-x-3 text-brand-200 hover:bg-white/10 hover:text-white">
+        <i class="fa-solid fa-chart-pie text-cyan-300 w-5"></i>
+        <span>數據儀表板</span>
+      </button>
+      <button onclick="switchTab('statistics'); toggleMobileMenu()" class="mobile-nav-item w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center space-x-3 text-brand-200 hover:bg-white/10 hover:text-white">
+        <i class="fa-solid fa-table-list text-cyan-300 w-5"></i>
+        <span>資料統計及下載</span>
+      </button>
+      <button onclick="switchTab('regulations'); toggleMobileMenu()" class="mobile-nav-item w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center space-x-3 text-brand-200 hover:bg-white/10 hover:text-white">
+        <i class="fa-solid fa-scale-balanced text-cyan-300 w-5"></i>
+        <span>法規查詢</span>
+      </button>
     </div>
   </header>
 
-  <!-- 主視覺 Hero Banner -->
-  <section class="relative overflow-hidden bg-gradient-to-b from-brand-50 via-warmgray-50 to-[#FBF9F6] py-14 sm:py-20 border-b border-warmgray-200">
-    <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-brand-100/50 blur-3xl pointer-events-none"></div>
-    <div class="absolute -left-20 top-40 w-80 h-80 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none"></div>
-    
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-      <div class="inline-flex items-center space-x-2 bg-brand-100 text-brand-800 px-3.5 py-1 rounded-full text-xs sm:text-sm font-semibold mb-6 shadow-sm">
-        <span>🍂 2026 秋季號特輯</span>
-        <span class="w-1.5 h-1.5 rounded-full bg-brand-600"></span>
-        <span>NTSRL 課堂五要素15原則修訂</span>
-      </div>
-      
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-warmgray-900 tracking-tight leading-tight font-serif mb-6">
-        在 AI 的速度裡，<br class="hidden sm:inline">
-        <span class="text-brand-600 underline decoration-brand-200 decoration-wavy decoration-2 underline-offset-8">守住學習的深度</span>
-      </h1>
-      
-      <p class="text-base sm:text-xl text-warmgray-700 max-w-3xl mx-auto leading-relaxed mb-8">
-        當科技愈來愈能幹，孩子是否真的愈來愈會學習？從自我調節（SRL）走向「人－AI 協同調節學習（HA-CoRL）」，劃清思考邊界，激發課堂共振。
-      </p>
+  <!-- 主內容容器 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6">
 
-      <!-- 速覽關鍵數據與架構徽章 -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto text-left">
-        <div class="bg-white p-3.5 rounded-xl border border-warmgray-200 shadow-sm card-bg">
-          <div class="text-xs font-semibold text-brand-700 uppercase tracking-wider">核心命題</div>
-          <div class="text-sm font-bold text-warmgray-900 mt-1">完成了 ≠ 學會了</div>
-          <div class="text-xs text-warmgray-700 mt-0.5">破除表現悖論</div>
-        </div>
-        <div class="bg-white p-3.5 rounded-xl border border-warmgray-200 shadow-sm card-bg">
-          <div class="text-xs font-semibold text-forest-700 uppercase tracking-wider">實踐指南</div>
-          <div class="text-sm font-bold text-warmgray-900 mt-1">5 要素 15 原則</div>
-          <div class="text-xs text-warmgray-700 mt-0.5">跨校共備新架構</div>
-        </div>
-        <div class="bg-white p-3.5 rounded-xl border border-warmgray-200 shadow-sm card-bg">
-          <div class="text-xs font-semibold text-blue-700 uppercase tracking-wider">人機關係</div>
-          <div class="text-sm font-bold text-warmgray-900 mt-1">鷹架 vs 替代品</div>
-          <div class="text-xs text-warmgray-700 mt-0.5">懂得搭更懂得拆</div>
-        </div>
-        <div class="bg-white p-3.5 rounded-xl border border-warmgray-200 shadow-sm card-bg">
-          <div class="text-xs font-semibold text-amber-700 uppercase tracking-wider">現場聲音</div>
-          <div class="text-sm font-bold text-warmgray-900 mt-1">7 位師生實踐</div>
-          <div class="text-xs text-warmgray-700 mt-0.5">第一線真實手記</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 內容主體容器 -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20">
-
-    <!-- 1. 主編的話 (Editor's Note) -->
-    <section id="editor-note" class="scroll-mt-24">
-      <div class="bg-white rounded-3xl p-6 sm:p-10 border border-warmgray-200 shadow-sm card-bg relative overflow-hidden">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-6 border-b border-warmgray-200 gap-4">
-          <div>
-            <span class="text-brand-600 font-bold text-xs uppercase tracking-widest block mb-1">EDITOR'S NOTE</span>
-            <h2 class="text-2xl sm:text-3xl font-bold text-warmgray-900 font-serif">主編的話：從自主學習走向人－AI 協同調節的共學旅程</h2>
-          </div>
-          <div class="flex items-center space-x-3 text-sm text-warmgray-700">
-            <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center font-bold text-brand-700">陳</div>
-            <div>
-              <div class="font-bold text-warmgray-900">陳君武 校長</div>
-              <div class="text-xs text-warmgray-700">2026 秋季號主編・新北市立福和國中</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 金句 Callout -->
-        <div class="my-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 border-l-4 border-amber-500 text-warmgray-900 key-callout transition-all">
-          <p class="font-bold text-base sm:text-lg text-amber-950 flex items-center">
-            <i class="ph-fill ph-quotes text-amber-600 mr-2 text-xl"></i>
-            「『完成了』不等於『學會了』；『得到答案』更不等於『擁有能力』。」
-          </p>
-          <p class="text-xs sm:text-sm text-amber-900 mt-2 leading-relaxed">
-            人機協作的目的，不是讓 AI 替學生做得更多，而是讓孩子在協作中學得更深；不是一味追求科技介入，而是懂得何時搭建鷹架、何時撤除支持，將學習的主導權還給孩子。
-          </p>
-        </div>
-
-        <div class="space-y-4 text-warmgray-700 leading-relaxed text-sm sm:text-base">
-          <p class="detail-paragraph">
-            當 AI 已能快速生成答案、規劃學習、診斷錯誤，甚至提供反思建議，我們不禁要問：當科技愈來愈能幹，孩子是否真的愈來愈會學習？
-            走進今日的教室，我們欣喜於 AI 協助學生突破學習障礙，也隱隱擔憂：當答案唾手可得，孩子是否逐漸失去提問、思辨與探索的耐心？科技提升了任務完成的效率，卻不必然帶來深刻的理解與學習遷移。
-          </p>
-          <p class="detail-paragraph">
-            NTSRL 走過六年的深耕歷程，從課堂微改變出發。115 學年度，我們修訂「國民中學促進自主學習課堂五要素 15 原則」，將數位與 AI 融入教學實踐，讓這套架構成為教師與陪伴專家共同觀察、對話與精進的專業語言，而非制式的評鑑檢核表。
-          </p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-            <div class="bg-warmgray-50 p-4 rounded-xl border border-warmgray-200">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">① 守住邊界，創造共振</span>
-              <span class="text-xs text-warmgray-700">人機分工中，思考、情感與價值判斷屬於人；在來回對話與質疑中激發深刻理解。</span>
-            </div>
-            <div class="bg-warmgray-50 p-4 rounded-xl border border-warmgray-200">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">② 從被動等待到自主選擇</span>
-              <span class="text-xs text-warmgray-700">當孩子能清楚說出「我為什麼這樣學、如何知道自己學會了」，自主學習才真正發生。</span>
-            </div>
-            <div class="bg-warmgray-50 p-4 rounded-xl border border-warmgray-200">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">③ 讓微改變匯聚成力量</span>
-              <span class="text-xs text-warmgray-700">持久改變非一套完美方案，而是一群願意提問、嘗試、反思修正與彼此支持的教育夥伴。</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. 主題報導：邊界與共振 (Deep Report) -->
-    <section id="deep-report" class="scroll-mt-24 space-y-8">
-      <div class="flex items-center space-x-3">
-        <div class="p-2.5 rounded-2xl bg-brand-600 text-white shadow-md">
-          <i class="ph-bold ph-compass text-2xl"></i>
-        </div>
+    <!-- 分頁 1: 即時稽查 -->
+    <section id="tab-inspection" class="space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span class="text-brand-600 font-bold text-xs uppercase tracking-widest block">FEATURE REPORT</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-warmgray-900 font-serif">邊界與共振：人——AI 協同調節學習的意義與課堂實踐（上）</h2>
-          <p class="text-xs sm:text-sm text-warmgray-700">撰文／洪詠善（國家教育研究院課程及教學研究中心研究員）</p>
-        </div>
-      </div>
-
-      <!-- 核心警訊：表現與學習的悖論 (OECD & Bastani 2025 研究) -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-warmgray-200 shadow-sm card-bg">
-        <h3 class="text-lg sm:text-xl font-bold text-warmgray-900 mb-4 flex items-center">
-          <i class="ph-bold ph-warning-circle text-rose-600 mr-2 text-xl"></i>
-          AI 時代的課堂警訊：「表現與學習的悖論（Performance-Learning Paradox）」
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <div class="space-y-3 text-sm text-warmgray-700 leading-relaxed">
-            <p>
-              土耳其高中千人數學田野實驗（Bastani et al., 2025）指出：<br>
-              學生使用一般型 GPT 練習時，<strong>練習表現飆升 48%</strong>；但當撤除 AI 後進行正式測驗，學生的表現反而<strong>比完全沒用 AI 的組別低了 17%</strong>！
-            </p>
-            <p class="detail-paragraph">
-              只有在加裝「教學護欄（Guardrails）」、只給提示啟發而不直接提供答案的「GPT Tutor」版本下，這項負面效應才被消弭。這項研究揭露了認知外包的危機：
-            </p>
-            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-950 text-xs sm:text-sm space-y-1">
-              <div><strong>⚠️ 後設認知惰性（Metacognitive Laziness）：</strong>直接依賴 AI 完成任務，學生缺乏自我監控與錯誤評估。</div>
-              <div><strong>⚠️ 認知卸載（Cognitive Offloading）：</strong>過度將大腦思考外包，卸載了真正學習所必需的心智歷程，導致「學得快卻變淺」。</div>
-            </div>
+          <div class="flex items-center space-x-2">
+            <span class="inline-block w-2.5 h-6 bg-brand-600 rounded-full"></span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800">新北市學生交通車即時聯合稽查紀錄</h2>
           </div>
-
-          <!-- 對比視覺圖卡 -->
-          <div class="bg-warmgray-50 p-5 rounded-2xl border border-warmgray-200 space-y-3">
-            <div class="text-xs font-bold text-warmgray-700 uppercase">實驗對照：移除 AI 後的真實獨立能力</div>
-            <div class="space-y-2">
-              <div>
-                <div class="flex justify-between text-xs font-medium mb-1">
-                  <span>一般無護欄 AI（直接給答案）</span>
-                  <span class="text-rose-600 font-bold">-17% 獨立考試衰退</span>
-                </div>
-                <div class="w-full bg-warmgray-200 h-3 rounded-full overflow-hidden">
-                  <div class="bg-rose-500 h-full w-[35%]"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between text-xs font-medium mb-1">
-                  <span>護欄啟發型 AI（GPT Tutor 僅給提示）</span>
-                  <span class="text-emerald-700 font-bold">消除負面衝擊並強化思考</span>
-                </div>
-                <div class="w-full bg-warmgray-200 h-3 rounded-full overflow-hidden">
-                  <div class="bg-emerald-600 h-full w-[70%]"></div>
-                </div>
-              </div>
-            </div>
-            <p class="text-xs text-warmgray-700 italic pt-2">
-              結論：國中端課堂必須保留「先想、比較、質疑與撤除 AI 支援」的環節。
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 核心概念演進：SRL -> AI-SRL -> HA-CoRL -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-warmgray-200 shadow-sm card-bg">
-        <h3 class="text-lg sm:text-xl font-bold text-warmgray-900 mb-2">人機協同的三大演進與定義</h3>
-        <p class="text-sm text-warmgray-700 mb-6">並非階級之分，而是教學情境下的彈性切換光譜。</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- SRL -->
-          <div class="p-5 rounded-2xl bg-stone-50 border border-stone-200 relative flex flex-col justify-between">
-            <div>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-stone-200 text-stone-800">無 AI 模式</span>
-              <h4 class="text-lg font-bold text-stone-900 mt-2">SRL 自我調節學習</h4>
-              <p class="text-xs text-stone-600 mt-1">Self-Regulated Learning</p>
-              <div class="my-3 text-xs text-stone-700 space-y-1.5 leading-relaxed">
-                <p><strong>主體核心：</strong>學生完全自律規劃、執行監控、反思調整，教師同儕給予回饋。</p>
-                <p><strong>適用情境：</strong>建立基礎運算、真實人際互動、身體感知實作、初階獨立思辨。</p>
-              </div>
-            </div>
-            <div class="pt-3 border-t border-stone-200 text-xs font-semibold text-stone-800">
-              觀察證據：手寫策略筆記、自評規準紀錄
-            </div>
-          </div>
-
-          <!-- AI-SRL -->
-          <div class="p-5 rounded-2xl bg-blue-50/70 border border-blue-200 relative flex flex-col justify-between">
-            <div>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">AI 輔助模式</span>
-              <h4 class="text-lg font-bold text-blue-950 mt-2">AI-SRL 輔助自我調節</h4>
-              <p class="text-xs text-blue-600 mt-1">AI-Supported SRL</p>
-              <div class="my-3 text-xs text-blue-900 space-y-1.5 leading-relaxed">
-                <p><strong>主體核心：</strong>學生仍是主導者；AI 扮演「可撤除的鷹架」，提供適性題庫、錯題提示與多表徵解釋。</p>
-                <p><strong>適用情境：</strong>需要即時形成性反饋、個人化練習、診斷起點行為。</p>
-              </div>
-            </div>
-            <div class="pt-3 border-t border-blue-200 text-xs font-semibold text-blue-900">
-              觀察證據：採納或拒絕 AI 建議的理由、無 AI 的獨立重測
-            </div>
-          </div>
-
-          <!-- HA-CoRL -->
-          <div class="p-5 rounded-2xl bg-brand-50/80 border border-brand-200 relative flex flex-col justify-between">
-            <div>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-800">人機共振模式</span>
-              <h4 class="text-lg font-bold text-brand-950 mt-2">HA-CoRL 人機協同調節</h4>
-              <p class="text-xs text-brand-600 mt-1">Human-AI Co-Regulated Learning</p>
-              <div class="my-3 text-xs text-brand-900 space-y-1.5 leading-relaxed">
-                <p><strong>主體核心：</strong>師生與 AI 分工。AI 是思考對手與共研夥伴，以「生產性摩擦」逼出深層判斷；<strong>人保有價值判斷與最終責任</strong>。</p>
-                <p><strong>適用情境：</strong>開放性專案（PBL）、多輪原型修正、跨觀點辨析。</p>
-              </div>
-            </div>
-            <div class="pt-3 border-t border-brand-200 text-xs font-semibold text-brand-900">
-              觀察證據：決策點論述、偏誤審查歷程、版本演進圖譜
-            </div>
-          </div>
-        </div>
-
-        <!-- 邊界與共振精闢解析 -->
-        <div class="mt-6 p-4 rounded-xl bg-warmgray-50 border border-warmgray-200 text-xs sm:text-sm text-warmgray-800 flex items-start space-x-3">
-          <i class="ph-fill ph-intersect text-brand-600 text-xl mt-0.5 flex-shrink-0"></i>
-          <div>
-            <strong class="font-bold text-warmgray-900">什麼是「邊界」？什麼是「共振」？</strong><br>
-            「邊界」是指人機協作中，<strong>哪些思考、情感、價值與責任必須由人承擔，不能外包給 AI</strong>；「共振」則是透過人機之間相互質疑、比較、查證與反思，逐輪深化學生的思考，激盪出「我真的懂了、我知道自己怎麼學會的」有感體驗。<strong>邊界愈清楚，共振愈深刻安全！</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- 課堂 5 要素 15 原則速查卡片 (NTSRL 115學年度架構) -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-warmgray-200 shadow-sm card-bg">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-          <div>
-            <h3 class="text-lg sm:text-xl font-bold text-warmgray-900">115 學年度 NTSRL 課堂促進自主學習 5 要素 15 原則</h3>
-            <p class="text-xs sm:text-sm text-warmgray-700">這不是一張打勾檢核表，而是課堂共備觀議課的「專業對話語言」</p>
-          </div>
-          <span class="mt-2 sm:mt-0 text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold self-start">
-            每單元聚焦 1~2 項槓桿原則即可
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
-          <!-- 要素 1 -->
-          <div class="p-4 rounded-xl border border-warmgray-200 bg-stone-50">
-            <div class="text-xs font-bold text-brand-700">要素 1</div>
-            <div class="text-base font-bold text-warmgray-900 mt-0.5">教學實踐</div>
-            <ul class="text-xs text-warmgray-700 mt-2 space-y-1">
-              <li>1-1 注重適性學習</li>
-              <li>1-2 強調素養導向</li>
-              <li>1-3 引導學會學習</li>
-            </ul>
-          </div>
-          <!-- 要素 2 -->
-          <div class="p-4 rounded-xl border border-warmgray-200 bg-stone-50">
-            <div class="text-xs font-bold text-brand-700">要素 2</div>
-            <div class="text-base font-bold text-warmgray-900 mt-0.5">學習評估</div>
-            <ul class="text-xs text-warmgray-700 mt-2 space-y-1">
-              <li>2-1 指導評量回饋</li>
-              <li>2-2 採用多元評估</li>
-              <li>2-3 善用反思調節</li>
-            </ul>
-          </div>
-          <!-- 要素 3 -->
-          <div class="p-4 rounded-xl border border-warmgray-200 bg-stone-50">
-            <div class="text-xs font-bold text-brand-700">要素 3</div>
-            <div class="text-base font-bold text-warmgray-900 mt-0.5">夥伴關係</div>
-            <ul class="text-xs text-warmgray-700 mt-2 space-y-1">
-              <li>3-1 建立互為主體</li>
-              <li>3-2 關懷社會情緒</li>
-              <li>3-3 支持自主經驗</li>
-            </ul>
-          </div>
-          <!-- 要素 4 -->
-          <div class="p-4 rounded-xl border border-warmgray-200 bg-stone-50">
-            <div class="text-xs font-bold text-brand-700">要素 4</div>
-            <div class="text-base font-bold text-warmgray-900 mt-0.5">學習環境</div>
-            <ul class="text-xs text-warmgray-700 mt-2 space-y-1">
-              <li>4-1 引導運用資源</li>
-              <li>4-2 營造共好情境</li>
-              <li>4-3 建立信任文化</li>
-            </ul>
-          </div>
-          <!-- 要素 5 -->
-          <div class="p-4 rounded-xl border border-warmgray-200 bg-stone-50">
-            <div class="text-xs font-bold text-brand-700">要素 5</div>
-            <div class="text-base font-bold text-warmgray-900 mt-0.5">數位與 AI</div>
-            <ul class="text-xs text-warmgray-700 mt-2 space-y-1">
-              <li>5-1 建立資訊倫理</li>
-              <li>5-2 應用數位AI教學</li>
-              <li>5-3 培養數位公民</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 教師判斷五問 -->
-        <div class="mt-6 p-4 rounded-2xl bg-stone-100 border border-stone-200 text-xs sm:text-sm">
-          <span class="font-bold text-stone-900 block mb-2">💡 備課決策「五問」（判斷是否使用 AI 與何時撤除）：</span>
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-stone-800">
-            <div><strong>① 目標：</strong>學生必須親自形成、能遷移的能力為何？</div>
-            <div><strong>② 價值：</strong>不用 AI 是否更能保留身心感知與人際體驗？</div>
-            <div><strong>③ 角色：</strong>AI 是單點鷹架，還是需多輪比較測試？</div>
-            <div><strong>④ 風險：</strong>適齡性、合規、偏誤與依賴風險如何控制？</div>
-            <div><strong>⑤ 證據：</strong>如何看見學生的查證、取捨與無 AI 獨立表現？</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. 教師實踐社群交流站 (Teachers' Hub) -->
-    <section id="teachers-hub" class="scroll-mt-24 space-y-6">
-      <div class="flex items-center space-x-3">
-        <div class="p-2.5 rounded-2xl bg-forest-600 text-white shadow-md">
-          <i class="ph-bold ph-chalkboard-teacher text-2xl"></i>
-        </div>
-        <div>
-          <span class="text-forest-600 font-bold text-xs uppercase tracking-widest block">COMMUNITY PRACTICE</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-warmgray-900 font-serif">社群交流站：把自主學習融入教室日常</h2>
-          <p class="text-xs sm:text-sm text-warmgray-700">看現場老師如何巧妙設計人機邊界，讓 AI 不替學生作決定，而是成為思考的催化劑</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- 案例 1：張書涵老師 (石門實中) -->
-        <div class="bg-white rounded-3xl p-6 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between hover:shadow-md transition">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900">時間管理 × 考後檢討</span>
-              <span class="text-xs text-warmgray-700">石門實驗國中</span>
-            </div>
-            <h3 class="text-xl font-bold text-warmgray-900">張書涵：AI 是一面鏡子，照出真實的學習盲點</h3>
-            
-            <div class="p-3 bg-amber-50 rounded-xl text-xs text-amber-950 font-medium key-callout">
-              「AI 可以分析，但不替學生設定目標。真正的自主是孩子從真實數據中認識自己。」
-            </div>
-
-            <div class="space-y-2 text-xs text-warmgray-700 leading-relaxed">
-              <p><strong>第一步：整理真實生活數據</strong><br>
-              學生先記錄 24 小時時間分配（通勤、手機、真正在讀書的時間）與各科準備策略，不談感覺，只看證據。</p>
-              <p><strong>第二步：AI 提問而非給答案</strong><br>
-              指令設計讓 AI 扮演反問的教練：「你花很多時間抄單字，真記住了嗎？」「練習題錯了有重新算過嗎？」</p>
-              <p class="detail-paragraph">
-                <strong>第三步：三選一自主承諾</strong><br>
-                從 AI 建議中挑選 3 個方法，再選出 1 個「自己今天就願意開始做的小行動」，產出專屬的學習狀態分析。
-              </p>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 text-xs text-forest-700 font-semibold flex items-center">
-            <i class="ph-bold ph-check-circle mr-1"></i> 守住界線：科技整理資訊，生命經驗歸於學生
-          </div>
-        </div>
-
-        <!-- 案例 2：李欣頤老師 (福和國中) -->
-        <div class="bg-white rounded-3xl p-6 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between hover:shadow-md transition">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900">班級文化 × SEL</span>
-              <span class="text-xs text-warmgray-700">福和國中</span>
-            </div>
-            <h3 class="text-xl font-bold text-warmgray-900">李欣頤：七個習慣與情感帳戶的班級實踐</h3>
-            
-            <div class="p-3 bg-emerald-50 rounded-xl text-xs text-emerald-950 font-medium key-callout">
-              「自主學習若缺乏引導，容易淪為放牛吃草。學習契約與儀表板讓反思有跡可循。」
-            </div>
-
-            <div class="space-y-2 text-xs text-warmgray-700 leading-relaxed">
-              <p><strong>學習契約（以終為始）：</strong><br>
-              白紙黑字寫下個人目標，親、師、生三方簽字見證，每次段考重啟檢核與對話。</p>
-              <p><strong>情感帳戶（雙贏思維）：</strong><br>
-              將信任具象化為班級存款與提款，組建共學小組定期「學習健檢」，營造同儕支持的安全感。</p>
-              <p class="detail-paragraph">
-                <strong>學習儀表板（不斷更新）：</strong><br>
-                八升九年級全面檢核學習態度、錯題訂正與家庭支持，培養孩子「負責任的決定」之 SEL 核心素養。
-              </p>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 text-xs text-forest-700 font-semibold flex items-center">
-            <i class="ph-bold ph-check-circle mr-1"></i> 實踐核心：自律不是一次性要求，而是在系統中養成習慣
-          </div>
-        </div>
-
-        <!-- 案例 3：林韋廷老師 (福和國中) -->
-        <div class="bg-white rounded-3xl p-6 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between hover:shadow-md transition">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-900">AI × PBL 生活科技</span>
-              <span class="text-xs text-warmgray-700">福和國中</span>
-            </div>
-            <h3 class="text-xl font-bold text-warmgray-900">林韋廷：讓想法動起來，讓創意做出來</h3>
-            
-            <div class="p-3 bg-blue-50 rounded-xl text-xs text-blue-950 font-medium key-callout">
-              「作品的價值不只在於技術複雜度，而在於學生能否說出理由，並在失敗中改善。」
-            </div>
-
-            <div class="space-y-2 text-xs text-warmgray-700 leading-relaxed">
-              <p><strong>跨域生活科技整合：</strong><br>
-              結合影像辨識模型訓練與機構輸送帶製作，以真實問題（如生活垃圾自動分檢）驅動探究。</p>
-              <p><strong>從索取答案到質疑限制：</strong><br>
-              引導學生追問 AI：「這個建議的限制是什麼？」「有沒有反例？」，理解不同角度光線對數據集辨識的影響。</p>
-              <p class="detail-paragraph">
-                <strong>重視 70% 思考軌跡：</strong><br>
-                工程設計循環中（發想-原型-測試-調整），失敗嘗試同等珍貴，將作品延伸至 ESG 環保與社會關懷。
-              </p>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 text-xs text-forest-700 font-semibold flex items-center">
-            <i class="ph-bold ph-check-circle mr-1"></i> 實踐核心：知識為動力，實踐成能力；AI 是副駕駛
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. 協作夥伴知音 (Partners in Collaboration) -->
-    <section id="partners" class="scroll-mt-24">
-      <div class="bg-gradient-to-br from-stone-900 to-warmgray-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg">
-        <div class="max-w-3xl">
-          <span class="text-amber-400 font-bold text-xs uppercase tracking-widest block mb-1">COLLABORATIVE MENTORSHIP</span>
-          <h2 class="text-2xl sm:text-3xl font-bold font-serif mb-2">從理解到同行：PBL 入校協作的角色與四個時期</h2>
-          <p class="text-warmgray-300 text-xs sm:text-sm">撰文／張堯卿（國立臺灣師範大學教育系兼任助理教授）</p>
-        </div>
-
-        <div class="mt-6 p-4 rounded-xl bg-white/10 border border-white/20 text-warmgray-200 text-xs sm:text-sm key-callout">
-          <p class="font-bold text-amber-300">
-            「好的協作，不是留下協作員的身影，而是當陪伴者離開後，學校仍然擁有持續向前的自主力量。」
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            由教育局、監理所及警察局三方聯合執行，現場逐項查驗判定車況與法規符合度，填寫完畢可即時產製標準公務稽查核章單 (PDF) 並寫入庫存。
           </p>
         </div>
-
-        <!-- 協作陪伴的趣味 4 階段 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
-            <div class="text-2xl mb-1">👀</div>
-            <h4 class="font-bold text-sm text-amber-300">階段一：觀光客時期</h4>
-            <p class="text-xs text-warmgray-300 mt-2 leading-relaxed">
-              學校客客氣氣，彼此還不熟。此時最重要的是「多看、多聽、少發言」，細細觀察學校脈絡與學生真實樣貌，不急著指手畫腳。
-            </p>
-          </div>
-          <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
-            <div class="text-2xl mb-1">🔍</div>
-            <h4 class="font-bold text-sm text-amber-300">階段二：被觀察時期</h4>
-            <p class="text-xs text-warmgray-300 mt-2 leading-relaxed">
-              教師開始考驗你的實務理解能力。你能否捕捉到第一線老師「求救的眼神」，並適時提出對症下藥的建議，是建立專業信任的關鍵。
-            </p>
-          </div>
-          <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
-            <div class="text-2xl mb-1">🏃‍♂️</div>
-            <h4 class="font-bold text-sm text-amber-300">階段三：見你就跑時期</h4>
-            <p class="text-xs text-warmgray-300 mt-2 leading-relaxed">
-              進度壓力增加，老師看到你彷彿又要交作業。這時協作員最該做的是提供「優質的情緒價值」，肯定每位老師的微小跨步，而非施加焦慮。
-            </p>
-          </div>
-          <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
-            <div class="text-2xl mb-1">🤝</div>
-            <h4 class="font-bold text-sm text-amber-300">階段四：期待見你時期</h4>
-            <p class="text-xs text-warmgray-300 mt-2 leading-relaxed">
-              信任完全建立，你成了「學校的自己人」。遇到瓶頸主動找你對話，甚至不需要分清誰是協作員、誰是被協作者，休戚與共、同行致遠。
-            </p>
-          </div>
-        </div>
-
-        <!-- 協作心法四原則 -->
-        <div class="mt-6 pt-6 border-t border-white/10 flex flex-wrap gap-4 text-xs text-warmgray-300">
-          <span class="flex items-center"><i class="ph-bold ph-caret-right text-amber-400 mr-1"></i> 多看多聽少發言</span>
-          <span class="flex items-center"><i class="ph-bold ph-caret-right text-amber-400 mr-1"></i> 提供優質的情緒價值</span>
-          <span class="flex items-center"><i class="ph-bold ph-caret-right text-amber-400 mr-1"></i> 適時提供對症下藥的好建議</span>
-          <span class="flex items-center"><i class="ph-bold ph-caret-right text-amber-400 mr-1"></i> 讓自己成為學校的一員</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. 青聽學習：學生心聲精選 (Students' Voice) -->
-    <section id="students-voice" class="scroll-mt-24 space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div class="flex items-center space-x-3">
-          <div class="p-2.5 rounded-2xl bg-amber-500 text-white shadow-md">
-            <i class="ph-bold ph-student text-2xl"></i>
-          </div>
-          <div>
-            <span class="text-amber-600 font-bold text-xs uppercase tracking-widest block">STUDENT VOICES</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-warmgray-900 font-serif">青聽學習：孩子們的自主與 AI 對話手記</h2>
-          </div>
-        </div>
-        <div class="text-xs text-warmgray-700 bg-warmgray-100 px-3 py-1.5 rounded-full self-start sm:self-auto">
-          點選卡片查看孩子們的學習心法
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="loadSampleInspectionData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-300 transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-brand-600"></i>
+            <span>帶入範例資料</span>
+          </button>
+          <button type="button" onclick="resetInspectionForm()" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>重置表單</span>
+          </button>
         </div>
       </div>
 
-      <!-- 學生故事互動網格 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- 稽查表單 -->
+      <form id="inspectionForm" onsubmit="handleInspectionSubmit(event)" class="space-y-6">
 
-        <!-- 學生 1：張嘉心 (ChatGPT vs NotebookLM) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">福和國中 8年級</span>
-              <span>張嘉心</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">我的專屬 AI 工具箱：表格化比較超好用</h4>
-            <div class="bg-amber-50 p-2.5 rounded-xl text-xs text-amber-950 font-medium mb-3 key-callout">
-              「ChatGPT 善於啟發思維；NotebookLM 根據我上傳的講義歸納、絕不胡說八道。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              讀完很多講義容易混淆，我會將歷史地理上傳整理成對照表，比較不同概念的差異。但 AI 整理完我一定要親自檢查重要資訊，因為它不能代替我思考。
-            </p>
+        <!-- 區塊一：基本稽查資訊 -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-brand-50 to-slate-50 border-b border-slate-200 px-3.5 py-3 sm:px-6 flex items-center justify-between gap-2">
+            <h3 class="text-xs sm:text-base font-bold text-brand-900 flex items-center space-x-2 min-w-0 flex-1 mr-2">
+              <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs flex-shrink-0">1</span>
+              <span class="truncate">稽查基本資訊 <span class="hidden sm:inline font-normal text-xs text-slate-500">(學校、時間、地點、人員)</span></span>
+            </h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-brand-700 bg-brand-100/80 px-2.5 py-0.5 rounded border border-brand-200 whitespace-nowrap flex-shrink-0">必填項目</span>
           </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#ChatGPT #NotebookLM</span>
-            <span class="text-emerald-700 font-bold">★ 掌握主導權</span>
+
+          <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5">
+            <div class="lg:col-span-4">
+              <label for="insp_school" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                學校名稱 <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="insp_school" name="school" required placeholder="請輸入國高中名稱" class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-sm px-3 py-2 border bg-white">
+            </div>
+
+            <div class="lg:col-span-4">
+              <div class="flex items-center justify-between mb-1">
+                <label for="insp_datetime" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                  稽查時間 <span class="text-rose-500">*</span>
+                </label>
+                <button type="button" onclick="setNowInspectionTime()" class="text-[11px] text-brand-600 hover:text-brand-800 underline">帶入現在時間</button>
+              </div>
+              <input type="datetime-local" id="insp_datetime" name="datetime" required onchange="updateFormattedTimeDisplay()" class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-sm px-3 py-2 border bg-white">
+              <div id="formattedTimeText" class="text-xs font-medium text-brand-800 bg-brand-50 px-2.5 py-1 rounded border border-brand-200 mt-1.5 flex items-center">
+                <i class="fa-regular fa-clock mr-1.5 text-brand-600"></i>
+                <span>未指定時間</span>
+              </div>
+            </div>
+
+            <div class="lg:col-span-4 md:col-span-2">
+              <label for="insp_location" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                稽查地點 <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="insp_location" name="location" required placeholder="例如：文化路一段與漢生東路交叉路口" class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-sm px-3 py-2 pr-10 border bg-white">
+                <button type="button" onclick="openLocationQuickSelect()" title="快速選擇新北學校周邊常用路口" class="absolute inset-y-0 right-0 pr-3 pl-2 flex items-center text-brand-600 hover:text-brand-800 transition">
+                  <i class="fa-solid fa-location-dot text-base text-rose-500 hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="lg:col-span-12 md:col-span-2 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
+                聯合稽查人員 <span class="text-rose-500">*</span>
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="p-2.5 bg-white rounded-lg border border-slate-200 flex flex-col justify-between space-y-2">
+                  <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="chk_insp_supervisor" checked class="w-4 h-4 text-brand-600 rounded border-slate-300">
+                    <span class="ml-2.5 text-xs sm:text-sm font-bold text-slate-800">監理單位</span>
+                  </label>
+                  <input type="text" id="insp_name_supervisor" placeholder="輸入姓名 (如：陳專員)" class="w-full text-xs rounded-md border-slate-300 px-2.5 py-1.5 border bg-slate-50">
+                </div>
+                <div class="p-2.5 bg-white rounded-lg border border-slate-200 flex flex-col justify-between space-y-2">
+                  <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="chk_insp_police" checked class="w-4 h-4 text-brand-600 rounded border-slate-300">
+                    <span class="ml-2.5 text-xs sm:text-sm font-bold text-slate-800">警察局</span>
+                  </label>
+                  <input type="text" id="insp_name_police" placeholder="輸入員警姓名 (如：李警員)" class="w-full text-xs rounded-md border-slate-300 px-2.5 py-1.5 border bg-slate-50">
+                </div>
+                <div class="p-2.5 bg-white rounded-lg border border-slate-200 flex flex-col justify-between space-y-2">
+                  <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="chk_insp_edu" checked class="w-4 h-4 text-brand-600 rounded border-slate-300">
+                    <span class="ml-2.5 text-xs sm:text-sm font-bold text-slate-800">教育局</span>
+                  </label>
+                  <input type="text" id="insp_name_edu" placeholder="輸入人員姓名 (如：王科員)" class="w-full text-xs rounded-md border-slate-300 px-2.5 py-1.5 border bg-slate-50">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 學生 2：葉力瑜 (因材網 e度 + 錯題複習) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">重慶國中 8年級</span>
-              <span>葉力瑜</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">Ai 我的智慧學習神隊友：因材網 e 度</h4>
-            <div class="bg-emerald-50 p-2.5 rounded-xl text-xs text-emerald-950 font-medium mb-3 key-callout">
-              「e 度不會直接給答案，而是像老師一樣一步步問我，引導我說出關鍵解法。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              以前錯題訂正完就忘了，現在我把錯題給 e 度看，它幫我抓出迷思概念並出類似題練習，直到我真正搞懂。先自己想破頭再問 AI，大腦才不會停止思考。
-            </p>
+        <!-- 區塊二：車輛現況與駕駛人員資訊 (客運選單+其他填寫、行照發照日期、實載選填) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-brand-50 to-slate-50 border-b border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between">
+            <h3 class="text-sm sm:text-base font-semibold text-brand-900 flex items-center space-x-2">
+              <span class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs">2</span>
+              <span>車輛現況與駕駛人員資訊</span>
+            </h3>
+            <span class="text-xs text-brand-700 bg-brand-100/60 px-2 py-0.5 rounded border border-brand-200">通運/客運登記</span>
           </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#因材網e度 #錯題診斷</span>
-            <span class="text-emerald-700 font-bold">★ 不怕問笨問題</span>
+
+          <div class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <!-- 單位名稱 (下拉選單 + 選其他展開填寫) -->
+            <div class="flex flex-col">
+              <label for="insp_operator" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>單位名稱 (通運/客運業者)</span>
+                <span class="text-rose-500 ml-1">*</span>
+              </label>
+              <select id="insp_operator" name="operator" required onchange="handleOperatorSelectChange()" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 px-3 border bg-white font-medium text-slate-800">
+                <option value="" disabled selected>請選擇通運/客運業者 ▼</option>
+                <option value="台北汽車客運股份有限公司">台北汽車客運股份有限公司</option>
+                <option value="大都會汽車客運股份有限公司">大都會汽車客運股份有限公司</option>
+                <option value="指南汽車客運股份有限公司">指南汽車客運股份有限公司</option>
+                <option value="三重汽車客運股份有限公司">三重汽車客運股份有限公司</option>
+                <option value="欣欣大眾汽車客運股份有限公司">欣欣大眾汽車客運股份有限公司</option>
+                <option value="新北通運有限公司">新北通運有限公司</option>
+                <option value="統聯通運股份有限公司">統聯通運股份有限公司</option>
+                <option value="東南汽車客運股份有限公司">東南汽車客運股份有限公司</option>
+                <option value="友善通用交通有限公司">友善通用交通有限公司</option>
+                <option value="安全通運有限公司">安全通運有限公司</option>
+                <option value="其他通運業者">其他 (自行輸入業者名稱...)</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_vehicle_type" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>車種</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <select id="insp_vehicle_type" name="vehicle_type" required class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium text-slate-800">
+                <option value="校車" selected>校車 (國高中學生專車)</option>
+                <option value="幼童車">幼童車 (幼童專用車)</option>
+                <option value="貨客車(補習、安親)">貨客車(補習、安親)</option>
+                <option value="身心障礙車">身心障礙車 (特教交通車)</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_plate" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>車號</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <input type="text" id="insp_plate" name="plate" required placeholder="如：KKA-1234" class="uppercase w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium">
+            </div>
+
+            <!-- 行照發照日期 (更新名稱) -->
+            <div class="flex flex-col">
+              <label for="insp_license_date" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>行照發照日期</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <input type="date" id="insp_license_date" name="license_date" required class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium">
+            </div>
+
+            <div class="flex flex-col">
+              <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>座椅類型</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <div class="grid grid-cols-2 gap-2 h-10">
+                <label class="flex items-center justify-center px-2 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-400 transition">
+                  <input type="radio" name="seat_type" value="非字" checked class="w-3.5 h-3.5 text-brand-600">
+                  <span class="ml-1.5 text-xs sm:text-sm font-medium text-slate-700">非字型</span>
+                </label>
+                <label class="flex items-center justify-center px-2 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-400 transition">
+                  <input type="radio" name="seat_type" value="川字" class="w-3.5 h-3.5 text-brand-600">
+                  <span class="ml-1.5 text-xs sm:text-sm font-medium text-slate-700">川字型</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_limit_passengers" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>法定限載人數</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <div class="relative h-10">
+                <input type="number" id="insp_limit_passengers" min="1" max="65" placeholder="如: 43" required oninput="checkOverloadStatus()" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 pl-3 pr-8 border bg-white font-medium">
+                <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium pointer-events-none">人</span>
+              </div>
+            </div>
+
+            <!-- 現場實載人數 (改為非必填) -->
+            <div class="flex flex-col">
+              <label for="insp_actual_passengers" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>現場實載人數</span>
+                <span class="text-slate-400 text-[11px] font-normal ml-1">(選填)</span>
+              </label>
+              <div class="relative h-10">
+                <input type="number" id="insp_actual_passengers" min="0" max="80" placeholder="如: 38 (無人可略)" oninput="checkOverloadStatus()" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 pl-3 pr-8 border bg-white font-medium">
+                <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium pointer-events-none">人</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_escort_status" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>隨車人員配置</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <select id="insp_escort_status" onchange="toggleEscortInput()" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium text-slate-800">
+                <option value="有配置" selected>有配置隨車人員 (合格)</option>
+                <option value="未配置">未配置隨車人員 (未符)</option>
+                <option value="非強制(高中專車)">非強制 (高中專車)</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_driver_name" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>駕駛員姓名</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <input type="text" id="insp_driver_name" name="driver_name" required placeholder="如：林志明" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium">
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_driver_id" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>身分證號碼</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <input type="text" id="insp_driver_id" name="driver_id" required placeholder="如：F123456789" class="uppercase w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium">
+            </div>
+
+            <div class="flex flex-col">
+              <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>駕照種類</span><span class="text-rose-500 ml-1">*</span>
+              </label>
+              <div class="grid grid-cols-2 gap-2 h-10">
+                <label class="flex items-center justify-center px-2 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-400 transition">
+                  <input type="radio" name="license_type" value="職業" checked onchange="checkDriverLicenseStatus()" class="w-3.5 h-3.5 text-brand-600">
+                  <span class="ml-1.5 text-xs font-semibold text-emerald-700">職業駕照</span>
+                </label>
+                <label class="flex items-center justify-center px-2 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-rose-300 transition">
+                  <input type="radio" name="license_type" value="普通" onchange="checkDriverLicenseStatus()" class="w-3.5 h-3.5 text-rose-600">
+                  <span class="ml-1.5 text-xs font-semibold text-rose-700">普通駕照</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="insp_escort_name" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5 h-5 flex items-center">
+                <span>隨車人員姓名</span>
+                <span class="text-slate-400 text-[11px] font-normal ml-1">(選填)</span>
+              </label>
+              <input type="text" id="insp_escort_name" placeholder="輸入隨車人員姓名" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white font-medium">
+            </div>
+
+            <!-- 其他通運業者展開輸入框 -->
+            <div id="customOperatorWrapper" class="hidden col-span-1 sm:col-span-2 lg:col-span-4 bg-brand-50/50 p-3 rounded-lg border border-brand-200">
+              <label for="insp_operator_custom" class="block text-xs font-semibold text-brand-900 mb-1">
+                請輸入通運/客運業者完整全名 <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="insp_operator_custom" placeholder="例如：新北客運通運有限公司" class="w-full h-10 text-xs sm:text-sm rounded-lg border-slate-300 focus:border-brand-500 px-3 border bg-white">
+            </div>
+
+            <div id="overloadWarning" class="hidden col-span-1 sm:col-span-2 lg:col-span-4 text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200 flex items-center shadow-sm">
+              <i class="fa-solid fa-triangle-exclamation mr-2 text-rose-500 text-sm"></i>
+              <span>警告：現場實載人數超過法定限載人數，系統自動判定為「超載違規」！</span>
+            </div>
+
+            <div id="licenseWarning" class="hidden col-span-1 sm:col-span-2 lg:col-span-4 text-xs font-semibold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200 flex items-center shadow-sm">
+              <i class="fa-solid fa-circle-exclamation mr-2 text-rose-500 text-sm"></i>
+              <span>警示：學生交通車駕駛人依法必須持有「職業駕駛執照」，持普通駕照屬重大違規！</span>
+            </div>
           </div>
         </div>
 
-        <!-- 學生 3：許愷恩 (籃球專題與自我決定) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">漳和國中 9年級</span>
-              <span>許愷恩</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">從喜歡 Curry 籃球，到學會為學習做決定</h4>
-            <div class="bg-blue-50 p-2.5 rounded-xl text-xs text-blue-950 font-medium mb-3 key-callout">
-              「自己做專題沒有現成標準答案，我學到最珍貴的是做決定與面對困難的堅定。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              自己聽 Podcast、找外媒防守訪談，分析 Curry 的跑動與投籃。在全校研習中上台發表，我發現把複雜細節講得讓沒看球的人也聽懂，是一門深刻的表達練習。
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#獨立探究 #表達溝通</span>
-            <span class="text-emerald-700 font-bold">★ 興趣驅動學習</span>
-          </div>
-        </div>
-
-        <!-- 學生 4：洪晨瑄 (克服英文口說羞怯) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">福和國中 8年級</span>
-              <span>洪晨瑄</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">青春的蛻變：AI 是良師益友，絕不是替身</h4>
-            <div class="bg-purple-50 p-2.5 rounded-xl text-xs text-purple-950 font-medium mb-3 key-callout">
-              「面對真人常會尷尬害羞，跟 AI 練習英文口說讓我建立自信，不再害怕犯錯。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              沒有校外補習，AI 成了耐心的私人家教，幫我潤飾中文英文寫作結構。它替我羽翼未豐的翅膀添上強勁的風，但始終由我自己掌握方向。
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#口說自信 #思緒梳理</span>
-            <span class="text-emerald-700 font-bold">★ 勇於嘗試</span>
-          </div>
-        </div>
-
-        <!-- 學生 5：練雨汝 (零碎時間管理) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">石門實中 9年級</span>
-              <span>練雨汝</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">零碎時間裡的微光：點亮三年會考路</h4>
-            <div class="bg-rose-50 p-2.5 rounded-xl text-xs text-rose-950 font-medium mb-3 key-callout">
-              「從七年級發呆等到老師交代，到九年級利用早上八點前空檔主動安排進度。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              透過老師引導用 AI 分析學習狀況，抓出手機干擾與拖延盲點。我學會把手機放遠、將目標切成小任務。自主學習就是懂得為自己的成長做出改變。
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#時間微習慣 #拒絕拖延</span>
-            <span class="text-emerald-700 font-bold">★ 自律養成</span>
-          </div>
-        </div>
-
-        <!-- 學生 6：饒喬予 & 洪聖惟 (國小探索與抓包AI) -->
-        <div class="bg-white rounded-3xl p-5 border border-warmgray-200 shadow-sm card-bg flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-warmgray-700 mb-2">
-              <span class="font-bold text-brand-700">永和國小 6年級</span>
-              <span>饒喬予 ＆ 洪聖惟</span>
-            </div>
-            <h4 class="font-bold text-warmgray-900 text-base mb-2">抓包 AI 胡言亂語！學會保持安全距離</h4>
-            <div class="bg-amber-50 p-2.5 rounded-xl text-xs text-amber-950 font-medium mb-3 key-callout">
-              「第一次抓包 AI 給出錯誤資料時嚇了一跳，從此養成『先思考、再查證』的習慣。」
-            </div>
-            <p class="text-xs text-warmgray-700 leading-relaxed detail-paragraph">
-              從模聯撰稿、校園小主播到詩詞創作營，AI 能快速整理草稿，但我們必須像老師一樣一次次修正發問指令。如果只是盲目複製，就會失去最寶貴的思考力。
-            </p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-warmgray-100 flex items-center justify-between text-[11px] text-warmgray-700">
-            <span>#AI資訊查證 #批判性思考</span>
-            <span class="text-emerald-700 font-bold">★ 數位識讀從小扎根</span>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 6. 新知報報：生成式 AI 從「會回答」到「會辦事」 (AI Agent) -->
-    <section id="ai-agent" class="scroll-mt-24">
-      <div class="bg-white rounded-3xl p-6 sm:p-10 border border-warmgray-200 shadow-sm card-bg space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-warmgray-200 pb-5">
-          <div class="flex items-center space-x-3">
-            <div class="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-md">
-              <i class="ph-bold ph-cpu text-2xl"></i>
-            </div>
+        <!-- 區塊三：安全設備檢核項目 (已移除反光標誌與合格標章，行車紀錄器說明更新) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-brand-50 to-slate-50 border-b border-slate-200 px-3.5 py-3 sm:px-6 flex items-center justify-between gap-2">
             <div>
-              <span class="text-indigo-600 font-bold text-xs uppercase tracking-widest block">NEW KNOWLEDGE</span>
-              <h2 class="text-2xl sm:text-3xl font-black text-warmgray-900 font-serif">生成式 AI 從「會回答」到「會辦事」</h2>
-              <p class="text-xs sm:text-sm text-warmgray-700">一位高中化學教師與 AI 協作三個月的現場深層反思／陳逸年（國教院研究教師）</p>
+              <h3 class="text-xs sm:text-base font-bold text-brand-900 flex items-center space-x-2">
+                <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs flex-shrink-0">3</span>
+                <span>車輛安全檢驗指標 <span class="hidden sm:inline font-normal text-xs text-slate-500">(現場查驗項目，符合請打勾)</span></span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">現場查核滅火器、車門安全門、警報裝置、行車紀錄器（反光標誌與標章依規免檢）</p>
             </div>
-          </div>
-          <span class="text-xs bg-indigo-50 text-indigo-800 px-3 py-1 rounded-full font-bold border border-indigo-200 self-start sm:self-auto">
-            AI Agent 代理架構
-          </span>
-        </div>
-
-        <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/80 border-l-4 border-amber-500 text-amber-950 font-medium text-xs sm:text-sm key-callout">
-          「很多老師試用 AI 失敗，不是因為 AI 笨，而是交辦時手邊<strong>沒有附上真實教材素材</strong>。AI 只能憑想像猜測你的需求。把交辦當成帶實習老師的藝術，給目標、給素材，要求指出『學生錯誤成因』！」
-        </div>
-
-        <!-- AI 的三個層次解析圖卡 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div class="p-4 rounded-2xl bg-warmgray-50 border border-warmgray-200">
-            <span class="text-xs font-bold text-warmgray-700">01 搜尋層 (Search)</span>
-            <div class="font-bold text-warmgray-900 text-base mt-1">Google 搜尋</div>
-            <p class="text-xs text-warmgray-700 mt-2">給關鍵字回傳連結，篩選整理的工作 100% 仍落在教師與學生身上。</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-warmgray-50 border border-warmgray-200">
-            <span class="text-xs font-bold text-warmgray-700">02 對話層 (Chatbot)</span>
-            <div class="font-bold text-warmgray-900 text-base mt-1">ChatGPT 網頁版</div>
-            <p class="text-xs text-warmgray-700 mt-2">你問一句它答一句。對話結束後無記憶延續，不翻你的課本，不知道班上學生常錯在哪。</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200">
-            <span class="text-xs font-bold text-indigo-700">03 代理層 (AI Agent)</span>
-            <div class="font-bold text-indigo-950 text-base mt-1">自主執行任務</div>
-            <p class="text-xs text-indigo-900 mt-2">接受明確目標與檔案庫，自行拆解步驟、讀寫目錄、留下修改痕跡並主動報告更動。</p>
-          </div>
-        </div>
-
-        <!-- 實戰操作指引：交辦三要件與三問 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2 text-xs sm:text-sm">
-          <div class="space-y-3 bg-stone-50 p-5 rounded-2xl border border-stone-200">
-            <h4 class="font-bold text-stone-900 text-base flex items-center">
-              <i class="ph-bold ph-pencil-simple-line text-brand-600 mr-2"></i> 實用指令三要件（帶實習老師心法）
-            </h4>
-            <div class="space-y-2 text-stone-800 leading-relaxed">
-              <p><strong>1. 目標導向而非步驟導向：</strong>「把這份教材更新進去，能合併就不要多開新檔」，保留彈性。</p>
-              <p><strong>2. 真實來源錨定：</strong>務必上傳下週講義或小考卷，嚴禁讓 AI 空憑印象瞎編。</p>
-              <p><strong>3. 必須要求「錯誤成因」：</strong>例如請它出三題迷思題，並標明「選 B 的學生是因為用外觀判斷而非化學組成」。迷思結構比題目本身更有價值！</p>
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+              <button type="button" onclick="selectAllChecks(true)" class="text-[10px] sm:text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium">全部合格</button>
+              <button type="button" onclick="selectAllChecks(false)" class="text-[10px] sm:text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded border border-slate-200 font-medium">全部取消</button>
             </div>
           </div>
 
-          <div class="space-y-3 bg-stone-50 p-5 rounded-2xl border border-stone-200">
-            <h4 class="font-bold text-stone-900 text-base flex items-center">
-              <i class="ph-bold ph-shield-check text-emerald-700 mr-2"></i> 教師主體性：交辦前的「三問」保險栓
-            </h4>
-            <div class="space-y-2 text-stone-800 leading-relaxed">
-              <p><strong>① 驗收標準：</strong>使用者自己說得清楚「做成怎樣算合格」嗎？說不清楚就先想想。</p>
-              <p><strong>② 識讀能力：</strong>AI 做錯細節，你的專業看得出來嗎？看得出來才交辦，看不出來別輕易放行。</p>
-              <p><strong>③ 審閱時間：</strong>你準備好當「審查者」了嗎？省下的是打字時間，花費的是專業品質把關。</p>
+          <div class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- 1. 滅火器 -->
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:shadow-sm transition" id="card_check_extinguisher">
+              <label class="flex items-start space-x-3 cursor-pointer">
+                <input type="checkbox" id="check_extinguisher" checked onchange="handleIndicatorChange()" class="w-5 h-5 mt-0.5 text-brand-600 rounded border-slate-300">
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-800">滅火器</span>
+                    <span id="badge_check_extinguisher" class="text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800">符合</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1">有效期限內、指針在有效綠色壓力範圍內。</p>
+                </div>
+              </label>
             </div>
-            <div class="text-[11px] text-warmgray-700 italic border-t border-stone-200 pt-2">
-              ※ 資安紅線提醒：務必遮蔽學生姓名個資，於系統設定關閉對話用於訓練模型。
+
+            <!-- 2. 車門 / 安全門 -->
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:shadow-sm transition" id="card_check_door">
+              <label class="flex items-start space-x-3 cursor-pointer">
+                <input type="checkbox" id="check_door" checked onchange="handleIndicatorChange()" class="w-5 h-5 mt-0.5 text-brand-600 rounded border-slate-300">
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-800">車門 / 安全門</span>
+                    <span id="badge_check_door" class="text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800">符合</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1">開啟防夾正常、緊急逃生安全門無障礙開關暢通。</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- 3. 警報裝置 -->
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:shadow-sm transition" id="card_check_alarm">
+              <label class="flex items-start space-x-3 cursor-pointer">
+                <input type="checkbox" id="check_alarm" checked onchange="handleIndicatorChange()" class="w-5 h-5 mt-0.5 text-brand-600 rounded border-slate-300">
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-800">警報裝置</span>
+                    <span id="badge_check_alarm" class="text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800">符合</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1">倒車警報與安全門連動警報蜂鳴器功能正常。</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- 4. 行車紀錄器 (說明調整為：需有車外前後左右及車內畫面) -->
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:shadow-sm transition" id="card_check_dashcam">
+              <label class="flex items-start space-x-3 cursor-pointer">
+                <input type="checkbox" id="check_dashcam" checked onchange="handleIndicatorChange()" class="w-5 h-5 mt-0.5 text-brand-600 rounded border-slate-300">
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-800">行車紀錄器</span>
+                    <span id="badge_check_dashcam" class="text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800">符合</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1 font-semibold text-brand-800">需有車外前後左右及車內畫面。</p>
+                </div>
+              </label>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 7. 活動紀實與專書推薦 (Events & Book) -->
-    <section id="book-recommend" class="scroll-mt-24 space-y-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- 左側：專書強力推薦卡 (佔 7 格) -->
-        <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-warmgray-200 shadow-sm card-bg space-y-5">
-          <div class="flex items-center space-x-2 text-brand-600 font-bold text-xs uppercase tracking-widest">
-            <i class="ph-bold ph-book-bookmark text-base"></i>
-            <span>MUST-READ BOOK RECOMMENDATION</span>
+        <!-- 區塊四：違規情形綜合判定 (同步移除反光標誌與標章違規選項) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-brand-50 to-slate-50 border-b border-slate-200 px-3.5 py-3 sm:px-6 flex items-center justify-between gap-2">
+            <h3 class="text-xs sm:text-base font-bold text-brand-900 flex items-center space-x-2 min-w-0 flex-1 mr-2">
+              <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs flex-shrink-0">4</span>
+              <span class="truncate">違規情形綜合判定</span>
+            </h3>
+            <span id="overallComplianceBadge" class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap flex-shrink-0">
+              檢驗判定：全項合格
+            </span>
           </div>
 
-          <h3 class="text-2xl sm:text-3xl font-black text-warmgray-900 font-serif leading-tight">
-            《啟動孩子自主學習力的 13 把關鍵鑰匙》
+          <div class="p-4 sm:p-6 space-y-4">
+            <p class="text-xs sm:text-sm text-slate-600">
+              系統已自動根據上述查驗、超載情形與駕照種類勾稽違規項目；稽查人員亦可手動增列：
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="滅火器異常" id="viol_extinguisher" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm text-slate-700">滅火器異常</span>
+              </label>
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="超載違規" id="viol_overload" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm font-semibold text-rose-700">超載違規</span>
+              </label>
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="持普通駕照" id="viol_license" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm font-semibold text-rose-700">持普通駕照</span>
+              </label>
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="車門/安全門異常" id="viol_door" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm text-slate-700">車門/安全門異常</span>
+              </label>
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="行車紀錄器異常" id="viol_dashcam" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm text-slate-700">行車紀錄器異常</span>
+              </label>
+              <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="violations" value="警報裝置異常" id="viol_alarm" onchange="syncViolationToChecks()" class="w-4 h-4 text-rose-600 rounded border-slate-300">
+                <span class="ml-2 text-xs sm:text-sm text-slate-700">警報裝置異常</span>
+              </label>
+            </div>
+
+            <div>
+              <label for="insp_remarks" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                現場處分與詳細說明 (選填)
+              </label>
+              <textarea id="insp_remarks" rows="2" placeholder="備註說明、處分依據或限期改善說明..." class="w-full text-xs sm:text-sm rounded-lg border-slate-300 px-3 py-2 border bg-white"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 按鈕列 -->
+        <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="previewAndDownloadCurrentPDF()" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-medium text-sm shadow transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-file-pdf text-rose-400"></i>
+            <span>下載勾選完成資料表 (PDF檔)</span>
+          </button>
+          <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow-md transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>儲存稽查紀錄並更新數據</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- 最近稽查列表 -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mt-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+            <i class="fa-solid fa-list-check text-brand-600"></i>
+            <span>最新稽查完成紀錄</span>
           </h3>
-          <p class="text-xs sm:text-sm text-warmgray-700">新北市自主學習六年深耕精粹專書・陳君武校長誠摯推薦</p>
-
-          <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs sm:text-sm text-amber-950 leading-relaxed key-callout">
-            <strong>破除「薛丁格的會」：</strong>好像懂了，卻不知道自己會不會做！
-            真正的自主學習不是讓老師完全退場，而是陪伴孩子經歷「領跑 ➔ 陪跑 ➔ 觀跑」的成熟過程。
-          </div>
-
-          <div class="space-y-3 text-xs sm:text-sm text-warmgray-700 leading-relaxed">
-            <p class="detail-paragraph">
-              這本書由蘇岱崙主編敏銳筆觸編織，匯聚國教院洪詠善教授、鄭章華教授理論指導，與新北第一線校長教師實務智慧。不談空泛口號，直擊教育盲點：
-            </p>
-            <div class="grid grid-cols-2 gap-2 pt-1 font-medium text-warmgray-800">
-              <div class="bg-warmgray-50 p-2.5 rounded-lg border border-warmgray-200">🔑 觀念重塑：破除被動標籤</div>
-              <div class="bg-warmgray-50 p-2.5 rounded-lg border border-warmgray-200">🔑 起跑預備：設計動機與策略</div>
-              <div class="bg-warmgray-50 p-2.5 rounded-lg border border-warmgray-200">🔑 課堂實踐：形成性評量鷹架</div>
-              <div class="bg-warmgray-50 p-2.5 rounded-lg border border-warmgray-200">🔑 學習新定義：把選擇權還給孩子</div>
-            </div>
-            <p class="italic text-xs text-warmgray-700 pt-1">
-              「我們真正要交給孩子的，不是一張通往未來的標準答案，而是一把能夠不斷開啟未知世界的鑰匙。」
-            </p>
-          </div>
+          <span class="text-xs text-slate-500">共 <span id="inspectionTotalCount">0</span> 筆</span>
         </div>
-
-        <!-- 右側：社群活動快訊 (佔 5 格) -->
-        <div class="lg:col-span-5 bg-stone-50 rounded-3xl p-6 sm:p-8 border border-warmgray-200 space-y-5">
-          <div class="flex items-center space-x-2 text-forest-700 font-bold text-xs uppercase tracking-widest">
-            <i class="ph-bold ph-calendar-check text-base"></i>
-            <span>COMMUNITY HIGHLIGHTS</span>
-          </div>
-
-          <h3 class="text-xl font-bold text-warmgray-900 font-serif">115 學年度社群動態與新成員加入</h3>
-
-          <div class="space-y-3 text-xs text-warmgray-700 leading-relaxed">
-            <div class="p-3 bg-white rounded-xl border border-warmgray-200 shadow-sm">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">🎉 歡迎新夥伴入列</span>
-              <p>光榮國中、貢寮實中、南勢國中、青山國中小正式加入 NTSRL 實踐社群！從在地永續專題到數位深入，齊心擴大共學版圖。</p>
-            </div>
-
-            <div class="p-3 bg-white rounded-xl border border-warmgray-200 shadow-sm">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">📘 《NTSRL 協作實務手冊》發布</span>
-              <p>導入 GROW 提問對話模式，陪伴專家化身「園藝師」與「編織者」，卸下評鑑包袱，做課堂最溫暖的後盾。</p>
-            </div>
-
-            <div class="p-3 bg-white rounded-xl border border-warmgray-200 shadow-sm">
-              <span class="font-bold text-warmgray-900 block text-sm mb-1">🎯 寒假自主學習評量規準革新</span>
-              <p>跳脫填鴨作業，建議<strong>學習歷程（思考軌跡與反思）佔比 70%</strong>，成果產出佔 30%，讓孩子在無鐘聲的假期成為自己的舵手。</p>
-            </div>
-          </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="min-w-[920px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-semibold border-y border-slate-200">
+              <tr>
+                <th class="py-2.5 px-3">時間</th>
+                <th class="py-2.5 px-3">受檢學校</th>
+                <th class="py-2.5 px-3">通運/客運業者</th>
+                <th class="py-2.5 px-3">車號 / 車種</th>
+                <th class="py-2.5 px-3">實載/限載</th>
+                <th class="py-2.5 px-3">檢驗結果</th>
+                <th class="py-2.5 px-3 text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="recentInspectionsTbody" class="divide-y divide-slate-100">
+              <!-- 動態渲染 -->
+            </tbody>
+          </table>
         </div>
-
       </div>
     </section>
 
+    <!-- 分頁 2: 數據儀表板 -->
+    <section id="tab-dashboard" class="space-y-6 hidden">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-clipboard-list"></i>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-slate-500">總稽查次數</div>
+            <div class="text-xl sm:text-2xl font-bold text-slate-800 mt-0.5" id="kpi_total_inspections">0</div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-bus"></i>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-slate-500">受檢車輛數</div>
+            <div class="text-xl sm:text-2xl font-bold text-slate-800 mt-0.5" id="kpi_total_vehicles">0</div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-slate-500">整體合格率</div>
+            <div class="text-xl sm:text-2xl font-bold text-slate-800 mt-0.5" id="kpi_compliance_rate">0%</div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl flex-shrink-0">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <div class="text-xs font-medium text-slate-500">違規件數統計</div>
+            <div class="text-xl sm:text-2xl font-bold text-rose-600 mt-0.5" id="kpi_violation_count">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-sm sm:text-base text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-chart-column text-brand-600"></i>
+              <span>學校稽查次數及受檢車輛數</span>
+            </h3>
+            <div class="flex items-center space-x-2">
+              <select id="chartSchoolSelect" onchange="handleChartFilterChange()" class="text-xs rounded-lg border-slate-300 px-2.5 py-1.5 border bg-white max-w-[170px]">
+                <option value="ALL">全部學校比較</option>
+              </select>
+            </div>
+          </div>
+          <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+            <div id="schoolChartEmpty" class="hidden flex flex-col items-center justify-center text-slate-400 space-y-2 py-12">
+              <i class="fa-solid fa-chart-column text-3xl text-slate-300"></i>
+              <span class="text-sm font-semibold text-slate-600">目前尚無符合之稽查數據</span>
+            </div>
+            <canvas id="schoolInspectionsChart" class="w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-sm sm:text-base text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-chart-pie text-rose-600"></i>
+              <span>違規情形樣態分佈</span>
+            </h3>
+          </div>
+          <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+            <canvas id="violationsPieChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分頁 3: 資料統計及下載 -->
+    <section id="tab-statistics" class="space-y-4 hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-4 py-3.5 sm:px-6 border-b border-slate-200 bg-slate-50/70 flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+          <div class="flex items-center space-x-2.5 flex-shrink-0">
+            <span class="inline-block w-2.5 h-6 bg-brand-600 rounded-full flex-shrink-0"></span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-800 whitespace-nowrap">交通車資料庫暨備查統計</h2>
+          </div>
+
+          <div class="w-full xl:w-auto p-1 bg-slate-200/80 rounded-xl flex overflow-x-auto custom-scrollbar flex-nowrap space-x-1 sm:space-x-1.5 text-xs font-semibold flex-shrink-0">
+            <button id="subtab-btn-schools" onclick="switchStatsSubtab('schools')" class="flex-1 min-w-[120px] h-9 px-2.5 rounded-lg shadow-sm bg-white text-brand-700 whitespace-nowrap flex items-center justify-center space-x-1.5 font-bold">
+              <i class="fa-solid fa-school text-brand-600 text-xs"></i>
+              <span>1. 各校交通車數量</span>
+            </button>
+            <button id="subtab-btn-contracts" onclick="switchStatsSubtab('contracts')" class="flex-1 min-w-[140px] h-9 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 whitespace-nowrap flex items-center justify-center space-x-1.5 font-medium bg-transparent">
+              <i class="fa-solid fa-file-contract text-slate-500 text-xs"></i>
+              <span>2. 契約簽訂與報局備查</span>
+            </button>
+            <button id="subtab-btn-accidents" onclick="switchStatsSubtab('accidents')" class="flex-1 min-w-[130px] h-9 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 whitespace-nowrap flex items-center justify-center space-x-1.5 font-medium bg-transparent">
+              <i class="fa-solid fa-car-burst text-slate-500 text-xs"></i>
+              <span>3. 交通事故報局備查</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="px-4 py-3 sm:px-6 bg-white border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto flex-1 mr-3">
+            <div class="relative w-full sm:w-64">
+              <input type="text" id="unifiedStatsSearch" oninput="handleUnifiedStatsSearch()" placeholder="搜尋學校名稱或客運業者..." class="w-full h-9 text-xs sm:text-sm rounded-lg border-slate-300 px-3 pl-9 border bg-slate-50/50">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="statsActionsWrapper" class="flex items-center justify-end space-x-2.5 flex-shrink-0">
+            <button type="button" onclick="exportDataToCSV()" class="h-9 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition flex items-center justify-center space-x-1 shadow-xs">
+              <i class="fa-solid fa-file-csv text-emerald-600 text-sm"></i>
+              <span>下載 CSV 檔</span>
+            </button>
+            <button type="button" id="btnAddSchool" onclick="openSchoolModal('add')" class="hidden h-9 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-xs transition flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-plus text-cyan-300"></i>
+              <span>新增學校車輛</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 子頁 1: 各校交通車數量 -->
+        <div id="stats-subtab-schools" class="overflow-x-auto custom-scrollbar">
+          <table class="min-w-[920px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-3.5">學校名稱</th>
+                <th class="py-3 px-3.5 text-center">學年度</th>
+                <th class="py-3 px-3.5">公私立別</th>
+                <th class="py-3 px-3.5 text-center">校車</th>
+                <th class="py-3 px-3.5 text-center">幼童</th>
+                <th class="py-3 px-3.5 text-center">補習安親</th>
+                <th class="py-3 px-3.5 text-center">身障</th>
+                <th class="py-3 px-3.5 text-center font-bold text-brand-900">總車輛數</th>
+                <th class="py-3 px-3.5">通運/客運業者</th>
+                <th class="py-3 px-3.5 text-center">備查狀態</th>
+                <th id="thSchoolAction" class="hidden py-3 px-3.5 text-right">管理操作</th>
+              </tr>
+            </thead>
+            <tbody id="schoolFleetTbody" class="divide-y divide-slate-100 bg-white">
+              <!-- 動態渲染 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 子頁 2: 契約簽訂與報局備查 -->
+        <div id="stats-subtab-contracts" class="overflow-x-auto custom-scrollbar hidden">
+          <table class="min-w-[950px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-3.5">學校名稱</th>
+                <th class="py-3 px-3.5 text-center">學年度</th>
+                <th class="py-3 px-3.5">簽約業者</th>
+                <th class="py-3 px-3.5">契約簽定日期</th>
+                <th class="py-3 px-3.5">報局備查日期</th>
+                <th class="py-3 px-3.5">教育局備查文號</th>
+                <th class="py-3 px-3.5 text-center">備查效力</th>
+              </tr>
+            </thead>
+            <tbody id="contractsTbody" class="divide-y divide-slate-100 bg-white">
+              <!-- 動態渲染 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 子頁 3: 交通事故報局備查 -->
+        <div id="stats-subtab-accidents" class="overflow-x-auto custom-scrollbar hidden">
+          <table class="min-w-[960px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-3.5">事故日期</th>
+                <th class="py-3 px-3.5">學校名稱</th>
+                <th class="py-3 px-3.5">客運業者</th>
+                <th class="py-3 px-3.5">車號</th>
+                <th class="py-3 px-3.5">司機姓名</th>
+                <th class="py-3 px-3.5">事故原因說明</th>
+                <th class="py-3 px-3.5 text-center">進度</th>
+              </tr>
+            </thead>
+            <tbody id="accidentsTbody" class="divide-y divide-slate-100 bg-white">
+              <!-- 動態渲染 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分頁 4: 法規查詢 -->
+    <section id="tab-regulations" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
+        <h2 class="text-lg font-bold text-slate-800 mb-1">學生交通車法規與作業規範查詢</h2>
+        <p class="text-xs text-slate-500">提供中央與新北市各項交通車管理規定法規依據。</p>
+      </div>
+      <div id="regulationsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 動態渲染 -->
+      </div>
+    </section>
   </main>
 
-  <!-- 頁腳資訊與著作權 -->
-  <footer class="bg-warmgray-900 text-warmgray-300 py-12 border-t border-warmgray-800 text-xs sm:text-sm mt-20">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-warmgray-800">
-        <div>
-          <h4 class="text-base font-bold text-white mb-1">新北市自主學習季報 2026 秋季號 (NTSRL)</h4>
-          <p class="text-xs text-warmgray-400">發行單位：新北市政府教育局｜國中促進自主學習行動工作圈</p>
-        </div>
-        <div class="flex items-center space-x-4 text-xs text-warmgray-400">
-          <span>發行人：張明文</span>
-          <span>總編輯：劉雅琪</span>
-          <span>秋季號主編：陳君武</span>
-        </div>
+  <!-- 雲端同步設定彈窗 -->
+  <div id="cloudSyncModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 p-5 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-base flex items-center space-x-2 text-slate-800">
+          <i class="fa-solid fa-table-cells text-brand-600"></i>
+          <span>Google 雲端試算表連動設定</span>
+        </h3>
+        <button type="button" onclick="closeCloudSyncModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-warmgray-400">
-        <div>
-          聯絡地址：23450 新北市永和區永利路 71 號（新北市立福和國中）<br>
-          推動核心：課堂五要素 15 原則・自我調節學習（SRL）與人機協同（HA-CoRL）
-        </div>
-        <div class="md:text-right">
-          © 2026 新北市政府教育局 NTSRL 團隊. 本網頁專為促進自主學習與專業共備對話設計。
-        </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">
+          Google Apps Script Web App 網址 (/exec)
+        </label>
+        <input type="url" id="gasAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full text-xs sm:text-sm rounded-lg border-slate-300 px-3 py-2 border font-mono">
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" onclick="syncFromCloud()" class="w-full py-2 px-3 rounded-lg bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+          <i class="fa-solid fa-rotate text-cyan-300"></i>
+          <span>即時從試算表同步</span>
+        </button>
+        <button type="button" onclick="saveGasUrl()" class="w-full py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition">
+          <span>儲存網址設定</span>
+        </button>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <!-- 頁面邏輯 JS -->
+  <!-- 用於產生 PDF 的隱藏 DOM 容器 (反光標誌與標章固定為免檢) -->
+  <div id="pdfPrintContainer" style="position: fixed; left: -9999px; top: 0; width: 820px; z-index: -9999; background: #ffffff; pointer-events: none; opacity: 1; visibility: visible;">
+    <div id="singleInspectionPdfTemplate" style="width: 794px; padding: 25px 30px; font-family: 'Noto Sans TC', sans-serif; color: #1e293b; background: #ffffff; box-sizing: border-box; display: block !important;">
+      <div style="text-align: center; border-bottom: 2px solid #0358a1; padding-bottom: 12px; margin-bottom: 16px;">
+        <div style="font-size: 14px; color: #475569; letter-spacing: 2px;">新北市政府教育局 聯合稽查專責紀錄表</div>
+        <div style="font-size: 22px; font-weight: bold; color: #074b83; margin: 4px 0;">新北市國高中學生交通車聯合稽查紀錄表</div>
+        <div style="font-size: 11px; color: #64748b;">依據教育部《學生交通車管理辦法》及《道路交通管理處罰條例》執行查核</div>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px;">
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 15%; padding: 6px 8px;">受檢學校</td>
+          <td id="pdf_school" style="border: 1px solid #cbd5e1; width: 35%; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 15%; padding: 6px 8px;">稽查時間</td>
+          <td id="pdf_time" style="border: 1px solid #cbd5e1; width: 35%; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">稽查地點</td>
+          <td id="pdf_location" colspan="3" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">稽查人員</td>
+          <td id="pdf_inspectors" colspan="3" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+      </table>
+
+      <div style="font-size: 13px; font-weight: bold; color: #074b83; margin-bottom: 6px;">【車輛現況與駕駛人員資料】</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px;">
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 18%; padding: 6px 8px;">單位名稱 (業者)</td>
+          <td id="pdf_operator" style="border: 1px solid #cbd5e1; width: 32%; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 18%; padding: 6px 8px;">車種</td>
+          <td id="pdf_vehicle_type" style="border: 1px solid #cbd5e1; width: 32%; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">車號</td>
+          <td id="pdf_plate" style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">行照發照日期</td>
+          <td id="pdf_license_date" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">座椅類型</td>
+          <td id="pdf_seat_type" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">載運人數查驗</td>
+          <td id="pdf_passengers" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">駕駛員姓名</td>
+          <td id="pdf_driver_name" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">身分證號碼</td>
+          <td id="pdf_driver_id" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">駕照種類</td>
+          <td id="pdf_license_type" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">隨車人員配置</td>
+          <td id="pdf_escort" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+      </table>
+
+      <!-- 6大指標項目表 (反光標誌與合格標章呈現「免檢」) -->
+      <div style="font-size: 13px; font-weight: bold; color: #074b83; margin-bottom: 6px;">【各項指標查驗結果】</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 14px;">
+        <tr style="background: #e2e8f0; font-weight: bold; text-align: center;">
+          <th style="border: 1px solid #cbd5e1; padding: 6px; width: 6%;">項次</th>
+          <th style="border: 1px solid #cbd5e1; padding: 6px; width: 22%;">查驗項目</th>
+          <th style="border: 1px solid #cbd5e1; padding: 6px; width: 16%;">查驗結果</th>
+          <th style="border: 1px solid #cbd5e1; padding: 6px;">法規標準要求與備註說明</th>
+        </tr>
+        <tr style="background: #f8fafc; color: #64748b;">
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">1</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">反光標誌</td>
+          <td style="border: 1px solid #cbd5e1; text-align: center; font-weight: bold; padding: 6px; color: #475569;">免檢</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px;">依現場稽查標準作業規範列為免檢項目</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">2</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">滅火器</td>
+          <td id="pdf_chk_extinguisher" style="border: 1px solid #cbd5e1; text-align: center; font-size: 13px; font-weight: bold; padding: 6px;">☑ 合格</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px;">有效期限內，指針位於綠色正常壓力區，車內固定牢靠</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">3</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">車門 / 安全門</td>
+          <td id="pdf_chk_door" style="border: 1px solid #cbd5e1; text-align: center; font-size: 13px; font-weight: bold; padding: 6px;">☑ 合格</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px;">出入門開啟防夾正常；安全門通暢無鎖死且開關正常</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">4</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">警報裝置</td>
+          <td id="pdf_chk_alarm" style="border: 1px solid #cbd5e1; text-align: center; font-size: 13px; font-weight: bold; padding: 6px;">☑ 合格</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px;">倒車警告聲響及安全門連動警報蜂鳴器功能正常</td>
+        </tr>
+        <tr style="background: #f8fafc; color: #64748b;">
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">5</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">合格標章</td>
+          <td style="border: 1px solid #cbd5e1; text-align: center; font-weight: bold; padding: 6px; color: #475569;">免檢</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px;">依現場稽查標準作業規範列為免檢項目</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px;">6</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; padding: 6px;">行車紀錄器</td>
+          <td id="pdf_chk_dashcam" style="border: 1px solid #cbd5e1; text-align: center; font-size: 13px; font-weight: bold; padding: 6px;">☑ 合格</td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; font-weight: bold;">需有車外前後左右及車內畫面，時間格式準確</td>
+        </tr>
+      </table>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 18%; padding: 6px 8px;">綜合稽查結果</td>
+          <td id="pdf_result_status" style="border: 1px solid #cbd5e1; width: 32%; font-weight: bold; padding: 6px 8px; color: #047857;">全項合格</td>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; width: 18%; padding: 6px 8px;">違規項目記載</td>
+          <td id="pdf_violations_list" style="border: 1px solid #cbd5e1; width: 32%; padding: 6px 8px;">無</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #cbd5e1; background: #f8fafc; font-weight: bold; padding: 6px 8px;">處分與改善說明</td>
+          <td id="pdf_remarks" colspan="3" style="border: 1px solid #cbd5e1; padding: 6px 8px;">-</td>
+        </tr>
+      </table>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 15px;">
+        <tr>
+          <td style="border: 1px solid #94a3b8; height: 75px; vertical-align: top; padding: 6px; width: 25%;">
+            <div style="font-weight: bold; color: #334155;">教育局代表簽章：</div>
+            <div style="margin-top: 35px; font-size: 10px; color: #94a3b8;">（簽名或蓋章）</div>
+          </td>
+          <td style="border: 1px solid #94a3b8; height: 75px; vertical-align: top; padding: 6px; width: 25%;">
+            <div style="font-weight: bold; color: #334155;">監理單位代表簽章：</div>
+            <div style="margin-top: 35px; font-size: 10px; color: #94a3b8;">（簽名或蓋章）</div>
+          </td>
+          <td style="border: 1px solid #94a3b8; height: 75px; vertical-align: top; padding: 6px; width: 25%;">
+            <div style="font-weight: bold; color: #334155;">警察局代表簽章：</div>
+            <div style="margin-top: 35px; font-size: 10px; color: #94a3b8;">（簽名或蓋章）</div>
+          </td>
+          <td style="border: 1px solid #94a3b8; height: 75px; vertical-align: top; padding: 6px; width: 25%;">
+            <div style="font-weight: bold; color: #334155;">受檢駕駛人簽收：</div>
+            <div style="margin-top: 35px; font-size: 10px; color: #94a3b8;">（本人簽名）</div>
+          </td>
+        </tr>
+      </table>
+      <div style="text-align: right; font-size: 10px; color: #64748b; margin-top: 10px;">
+        新北市政府教育局 聯合稽查平台自動產製 | 列印時間：<span id="pdf_gen_timestamp"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- JavaScript 核心邏輯 -->
   <script>
-    // 閱讀進度條監聽
-    window.addEventListener('scroll', () => {
-      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      document.getElementById('progressBar').style.width = scrolled + '%';
+    const DEFAULT_INSPECTIONS = [];
+    const DEFAULT_SCHOOL_FLEET = [];
+    const DEFAULT_ACCIDENTS = [];
+    const DEFAULT_REGULATIONS = [
+      {
+        id: "REG-01",
+        title: "學生交通車管理辦法",
+        category: "中央法規",
+        authority: "教育部、交通部",
+        lastUpdated: "2023-06-20",
+        url: "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=H0070050",
+        summary: "規範各級學校、短期補習班學生交通車。明訂車齡限制、駕駛人領有職業執照、應配置隨車人員。"
+      },
+      {
+        id: "REG-02",
+        title: "道路交通管理處罰條例 (超載與駕照處罰)",
+        category: "裁罰與基準",
+        authority: "交通部、內政部",
+        lastUpdated: "2024-04-01",
+        url: "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=K0040012",
+        summary: "第30條載運人數超過核定數額處罰罰鍰；第22條領有普通駕駛執照以駕駛為職業加重處罰。"
+      }
+    ];
+
+    function safeGetStorage(key, defaultVal) {
+      try {
+        const val = localStorage.getItem(key);
+        return val ? JSON.parse(val) : defaultVal;
+      } catch (err) {
+        return defaultVal;
+      }
+    }
+
+    function safeSetStorage(key, val) {
+      try {
+        localStorage.setItem(key, JSON.stringify(val));
+      } catch (err) {}
+    }
+
+    let inspectionsData = safeGetStorage('ntpc_inspections', DEFAULT_INSPECTIONS);
+    let schoolFleetData = safeGetStorage('ntpc_school_fleet', DEFAULT_SCHOOL_FLEET);
+    let accidentsData = safeGetStorage('ntpc_accidents', DEFAULT_ACCIDENTS);
+    let regulationsData = safeGetStorage('ntpc_regulations', DEFAULT_REGULATIONS);
+    let gasAppUrl = safeGetStorage('ntpc_gas_url', '');
+    let isManagerMode = safeGetStorage('ntpc_manager_mode', false);
+    let currentActiveTab = 'inspection';
+    let currentActiveStatsSubtab = 'schools';
+
+    let schoolInspectionsChartInstance = null;
+    let violationsPieChartInstance = null;
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto p-4 rounded-xl shadow-lg border text-xs sm:text-sm text-white ${type === 'success' ? 'bg-slate-900 border-emerald-500' : 'bg-rose-900 border-rose-500'}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function switchTab(tabId) {
+      ['inspection', 'dashboard', 'statistics', 'regulations'].forEach(t => {
+        document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tabId);
+        document.getElementById(`nav-btn-${t}`)?.classList.toggle('bg-white/15', t === tabId);
+      });
+      if (tabId === 'dashboard') renderDashboard();
+      if (tabId === 'statistics') renderAllStatisticsTables();
+      if (tabId === 'regulations') renderRegulationsList();
+      if (tabId === 'inspection') renderRecentInspectionsTable();
+    }
+
+    function toggleMobileMenu() {
+      document.getElementById('mobileMenu')?.classList.toggle('hidden');
+    }
+
+    function toggleManagerMode() {
+      isManagerMode = !isManagerMode;
+      safeSetStorage('ntpc_manager_mode', isManagerMode);
+      document.getElementById('thSchoolAction')?.classList.toggle('hidden', !isManagerMode);
+      document.getElementById('btnAddSchool')?.classList.toggle('hidden', !isManagerMode);
+      renderSchoolFleetTable();
+      showToast(isManagerMode ? "已啟用管理模式" : "已切換為檢視模式", "success");
+    }
+
+    // 處理業者下拉與自訂文字框
+    function handleOperatorSelectChange() {
+      const select = document.getElementById('insp_operator');
+      const wrapper = document.getElementById('customOperatorWrapper');
+      const customInput = document.getElementById('insp_operator_custom');
+      if (!select || !wrapper) return;
+
+      if (select.value === '其他通運業者') {
+        wrapper.classList.remove('hidden');
+        if (customInput) customInput.focus();
+      } else {
+        wrapper.classList.add('hidden');
+      }
+    }
+
+    function openLocationQuickSelect() {
+      const loc = prompt("請輸入或修改稽查地點（常用如：文化路一段與民權路交叉路口）", document.getElementById('insp_location').value);
+      if (loc !== null && loc.trim() !== "") {
+        document.getElementById('insp_location').value = loc.trim();
+      }
+    }
+
+    function openCloudSyncModal() {
+      const input = document.getElementById('gasAppUrlInput');
+      if (input) input.value = gasAppUrl;
+      document.getElementById('cloudSyncModal')?.classList.remove('hidden');
+      document.getElementById('cloudSyncModal')?.classList.add('flex');
+    }
+
+    function closeCloudSyncModal() {
+      document.getElementById('cloudSyncModal')?.classList.add('hidden');
+      document.getElementById('cloudSyncModal')?.classList.remove('flex');
+    }
+
+    function saveGasUrl() {
+      gasAppUrl = (document.getElementById('gasAppUrlInput')?.value || '').trim();
+      safeSetStorage('ntpc_gas_url', gasAppUrl);
+      closeCloudSyncModal();
+      showToast("已成功儲存 Apps Script 網址！", "success");
+    }
+
+    async function syncFromCloud() {
+      if (!gasAppUrl || !gasAppUrl.startsWith('http')) {
+        showToast("請先輸入有效的 Web App 網址", "error");
+        return;
+      }
+      showToast("連線 Google 試算表中...", "success");
+      try {
+        const res = await fetch(gasAppUrl + "?action=getAll&t=" + Date.now());
+        const data = await res.json();
+        if (data && data.status === 'success') {
+          inspectionsData = Array.isArray(data.inspections) ? data.inspections : [];
+          schoolFleetData = Array.isArray(data.schoolFleet) ? data.schoolFleet : [];
+          accidentsData = Array.isArray(data.accidents) ? data.accidents : [];
+          safeSetStorage('ntpc_inspections', inspectionsData);
+          safeSetStorage('ntpc_school_fleet', schoolFleetData);
+          safeSetStorage('ntpc_accidents', accidentsData);
+          renderAllStatisticsTables();
+          renderRecentInspectionsTable();
+          renderDashboard();
+          showToast("資料已與 Google 試算表同步完成！", "success");
+        }
+      } catch (err) {
+        showToast("同步失敗，請確認 Apps Script 權限設為「所有人」", "error");
+      }
+    }
+
+    function switchStatsSubtab(subId) {
+      currentActiveStatsSubtab = subId;
+      ['schools', 'contracts', 'accidents'].forEach(s => {
+        document.getElementById(`stats-subtab-${s}`)?.classList.toggle('hidden', s !== subId);
+        document.getElementById(`subtab-btn-${s}`)?.classList.toggle('bg-white', s === subId);
+      });
+    }
+
+    function handleUnifiedStatsSearch() {
+      renderSchoolFleetTable();
+    }
+
+    function renderSchoolFleetTable() {
+      const tbody = document.getElementById('schoolFleetTbody');
+      const keyword = (document.getElementById('unifiedStatsSearch')?.value || '').toLowerCase().trim();
+      if (!tbody) return;
+
+      const filtered = schoolFleetData.filter(item => !keyword || item.school?.toLowerCase().includes(keyword));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-slate-400">目前尚無學校交通車資料（保持淨空）</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-3 font-bold text-slate-800">${item.school || '-'}</td>
+          <td class="py-2.5 px-3 text-center">${item.academicYear || '115學年度'}</td>
+          <td class="py-2.5 px-3">${item.type || '公立高中'}</td>
+          <td class="py-2.5 px-3 text-center">${item.schoolBus || 0}</td>
+          <td class="py-2.5 px-3 text-center">${item.childBus || 0}</td>
+          <td class="py-2.5 px-3 text-center">${item.coachBus || 0}</td>
+          <td class="py-2.5 px-3 text-center">${item.disabledBus || 0}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-brand-900">${item.total || 0}</td>
+          <td class="py-2.5 px-3">${item.operator || '-'}</td>
+          <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-800">${item.status || '已備查'}</span></td>
+          ${isManagerMode ? `<td class="py-2.5 px-3 text-right"><button onclick="deleteSchoolFleetItem('${item.school}')" class="text-rose-600 hover:underline">刪除</button></td>` : ''}
+        </tr>
+      `).join('');
+    }
+
+    function deleteSchoolFleetItem(name) {
+      if (confirm(`確定要刪除【${name}】嗎？`)) {
+        schoolFleetData = schoolFleetData.filter(x => x.school !== name);
+        safeSetStorage('ntpc_school_fleet', schoolFleetData);
+        renderSchoolFleetTable();
+        showToast("已成功刪除該筆資料！", "success");
+      }
+    }
+
+    function renderAllStatisticsTables() {
+      renderSchoolFleetTable();
+    }
+
+    function renderRecentInspectionsTable() {
+      const tbody = document.getElementById('recentInspectionsTbody');
+      if (!tbody) return;
+      if (inspectionsData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">目前尚無任何稽查紀錄（保持淨空）</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = inspectionsData.map(item => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-3">${item.formattedTime || item.datetime || '-'}</td>
+          <td class="py-2.5 px-3 font-bold">${item.school || '-'}</td>
+          <td class="py-2.5 px-3">${item.operator || '-'}</td>
+          <td class="py-2.5 px-3 font-mono font-bold">${item.plate || '-'}</td>
+          <td class="py-2.5 px-3">${item.actual_passengers || 0} / ${item.limit_passengers || 0} 人</td>
+          <td class="py-2.5 px-3">${item.violations?.length > 0 ? '<span class="text-rose-600 font-bold">違規</span>' : '<span class="text-emerald-600 font-bold">合格</span>'}</td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="downloadRecordAsPDF('${item.id}')" class="text-xs text-brand-600 hover:underline mr-2">PDF</button>
+            <button onclick="deleteInspectionItem('${item.id}')" class="text-xs text-rose-500 hover:underline">刪除</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function deleteInspectionItem(id) {
+      if (confirm("確定要刪除這筆紀錄嗎？")) {
+        inspectionsData = inspectionsData.filter(x => x.id !== id);
+        safeSetStorage('ntpc_inspections', inspectionsData);
+        renderRecentInspectionsTable();
+        renderDashboard();
+      }
+    }
+
+    function renderDashboard() {
+      document.getElementById('kpi_total_inspections').textContent = inspectionsData.length + " 次";
+      document.getElementById('kpi_total_vehicles').textContent = new Set(inspectionsData.map(x => x.plate)).size + " 輛";
+      const compliant = inspectionsData.filter(x => !x.violations || x.violations.length === 0).length;
+      document.getElementById('kpi_compliance_rate').textContent = (inspectionsData.length > 0 ? ((compliant / inspectionsData.length) * 100).toFixed(1) : 100) + "%";
+      const totalViols = inspectionsData.reduce((acc, curr) => acc + (curr.violations?.length || 0), 0);
+      document.getElementById('kpi_violation_count').textContent = totalViols + " 項次";
+      document.getElementById('schoolChartEmpty')?.classList.toggle('hidden', inspectionsData.length > 0);
+      document.getElementById('schoolInspectionsChart')?.classList.toggle('hidden', inspectionsData.length === 0);
+    }
+
+    function renderRegulationsList() {
+      const container = document.getElementById('regulationsContainer');
+      if (!container) return;
+      container.innerHTML = regulationsData.map(reg => `
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-100 text-brand-800">${reg.category}</span>
+          </div>
+          <h3 class="font-bold text-base text-slate-800 mb-1">${reg.title}</h3>
+          <p class="text-xs text-slate-600 mb-3">${reg.summary}</p>
+          <a href="${reg.url}" target="_blank" class="text-xs font-semibold text-brand-600 hover:underline">檢視官方全國法規 &rarr;</a>
+        </div>
+      `).join('');
+    }
+
+    function setNowInspectionTime() {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('insp_datetime').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      updateFormattedTimeDisplay();
+    }
+
+    function updateFormattedTimeDisplay() {
+      const val = document.getElementById('insp_datetime')?.value;
+      if (val) document.getElementById('formattedTimeText').innerHTML = `<i class="fa-regular fa-clock mr-1.5 text-brand-600"></i><span class="font-bold">${val.replace('T', ' ')}</span>`;
+    }
+
+    function checkOverloadStatus() {
+      const limit = parseInt(document.getElementById('insp_limit_passengers')?.value || '0', 10);
+      const actualInput = document.getElementById('insp_actual_passengers')?.value;
+      const actual = actualInput ? parseInt(actualInput, 10) : 0;
+      const isOver = (actual > limit && limit > 0);
+      document.getElementById('overloadWarning')?.classList.toggle('hidden', !isOver);
+      const violOverload = document.getElementById('viol_overload');
+      if (violOverload) violOverload.checked = isOver;
+      updateOverallComplianceBadge();
+    }
+
+    function checkDriverLicenseStatus() {
+      const type = document.querySelector('input[name="license_type"]:checked')?.value;
+      const isNormal = (type === '普通');
+      document.getElementById('licenseWarning')?.classList.toggle('hidden', !isNormal);
+      const violLicense = document.getElementById('viol_license');
+      if (violLicense) violLicense.checked = isNormal;
+      updateOverallComplianceBadge();
+    }
+
+    function handleIndicatorChange() {
+      const map = [
+        { chk: 'check_extinguisher', viol: 'viol_extinguisher', card: 'card_check_extinguisher', badge: 'badge_check_extinguisher' },
+        { chk: 'check_door', viol: 'viol_door', card: 'card_check_door', badge: 'badge_check_door' },
+        { chk: 'check_alarm', viol: 'viol_alarm', card: 'card_check_alarm', badge: 'badge_check_alarm' },
+        { chk: 'check_dashcam', viol: 'viol_dashcam', card: 'card_check_dashcam', badge: 'badge_check_dashcam' }
+      ];
+
+      map.forEach(item => {
+        const c = document.getElementById(item.chk);
+        const v = document.getElementById(item.viol);
+        const card = document.getElementById(item.card);
+        const badge = document.getElementById(item.badge);
+
+        if (c && c.checked) {
+          if (v) v.checked = false;
+          if (card) {
+            card.classList.remove('border-rose-300', 'bg-rose-50/40');
+            card.classList.add('border-slate-200', 'bg-white');
+          }
+          if (badge) {
+            badge.className = 'text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800';
+            badge.textContent = '符合';
+          }
+        } else {
+          if (v) v.checked = true;
+          if (card) {
+            card.classList.remove('border-slate-200', 'bg-white');
+            card.classList.add('border-rose-300', 'bg-rose-50/40');
+          }
+          if (badge) {
+            badge.className = 'text-[11px] px-2 py-0.5 rounded-full font-medium bg-rose-100 text-rose-800';
+            badge.textContent = '未符規定';
+          }
+        }
+      });
+      updateOverallComplianceBadge();
+    }
+
+    function syncViolationToChecks() {
+      const map = [
+        { viol: 'viol_extinguisher', chk: 'check_extinguisher' },
+        { viol: 'viol_door', chk: 'check_door' },
+        { viol: 'viol_alarm', chk: 'check_alarm' },
+        { viol: 'viol_dashcam', chk: 'check_dashcam' }
+      ];
+      map.forEach(item => {
+        const v = document.getElementById(item.viol);
+        const c = document.getElementById(item.chk);
+        if (v && c) c.checked = !v.checked;
+      });
+      handleIndicatorChange();
+    }
+
+    function updateOverallComplianceBadge() {
+      const badge = document.getElementById('overallComplianceBadge');
+      if (!badge) return;
+      const count = document.querySelectorAll('input[name="violations"]:checked').length;
+      if (count === 0) {
+        badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200';
+        badge.innerHTML = '檢驗判定：全項合格';
+      } else {
+        badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-rose-100 text-rose-800 border border-rose-200';
+        badge.innerHTML = `檢驗判定：違規異常 (${count} 項)`;
+      }
+    }
+
+    function toggleEscortInput() {
+      const sel = document.getElementById('insp_escort_status');
+      const input = document.getElementById('insp_escort_name');
+      if (sel && input) {
+        if (sel.value === '未配置') {
+          input.value = '無隨車人員';
+          input.disabled = true;
+        } else {
+          input.disabled = false;
+          if (input.value === '無隨車人員') input.value = '';
+        }
+      }
+    }
+
+    function selectAllChecks(val) {
+      ['check_extinguisher', 'check_door', 'check_alarm', 'check_dashcam'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = val;
+      });
+      handleIndicatorChange();
+    }
+
+    function exportDataToCSV() {
+      let csv = "\uFEFF學校名稱,學年度,總車輛數,通運業者\n";
+      schoolFleetData.forEach(s => {
+        csv += `"${s.school}","${s.academicYear}",${s.total},"${s.operator}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `交通車資料統計_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    function handleInspectionSubmit(e) {
+      e.preventDefault();
+      const school = document.getElementById('insp_school').value.trim();
+      const plate = document.getElementById('insp_plate').value.trim().toUpperCase();
+
+      const opSelect = document.getElementById('insp_operator');
+      let operator = opSelect.value;
+      if (operator === '其他通運業者') {
+        operator = document.getElementById('insp_operator_custom').value.trim();
+      }
+      if (!operator) {
+        showToast("請選擇或填寫通運/客運業者！", "error");
+        return;
+      }
+
+      const actualInput = document.getElementById('insp_actual_passengers')?.value;
+      const actual_passengers = actualInput ? parseInt(actualInput, 10) : 0;
+      const limit_passengers = parseInt(document.getElementById('insp_limit_passengers').value || '0', 10);
+
+      const violations = [];
+      document.querySelectorAll('input[name="violations"]:checked').forEach(c => violations.push(c.value));
+
+      const item = {
+        id: "INSP-" + Date.now().toString().slice(-6),
+        datetime: document.getElementById('insp_datetime').value,
+        formattedTime: document.getElementById('insp_datetime').value.replace('T', ' '),
+        school: school,
+        location: document.getElementById('insp_location').value.trim(),
+        operator: operator,
+        vehicle_type: document.getElementById('insp_vehicle_type').value,
+        plate: plate,
+        license_date: document.getElementById('insp_license_date').value,
+        seat_type: document.querySelector('input[name="seat_type"]:checked')?.value || '非字',
+        actual_passengers: actual_passengers,
+        limit_passengers: limit_passengers,
+        driver_name: document.getElementById('insp_driver_name').value.trim(),
+        driver_id: document.getElementById('insp_driver_id').value.trim(),
+        license_type: document.querySelector('input[name="license_type"]:checked')?.value || '職業',
+        escort_status: document.getElementById('insp_escort_status').value,
+        escort_name: document.getElementById('insp_escort_name').value.trim() || '無',
+        checks: {
+          extinguisher: document.getElementById('check_extinguisher').checked,
+          door: document.getElementById('check_door').checked,
+          alarm: document.getElementById('check_alarm').checked,
+          dashcam: document.getElementById('check_dashcam').checked
+        },
+        violations: violations,
+        remarks: document.getElementById('insp_remarks').value.trim()
+      };
+
+      inspectionsData.unshift(item);
+      safeSetStorage('ntpc_inspections', inspectionsData);
+      renderRecentInspectionsTable();
+      renderDashboard();
+      showToast(`已成功新增【${school}】稽查紀錄！`, 'success');
+    }
+
+    function loadSampleInspectionData() {
+      document.getElementById('insp_school').value = '新北市立板橋高級中學';
+      document.getElementById('insp_operator').value = '台北汽車客運股份有限公司';
+      handleOperatorSelectChange();
+      document.getElementById('insp_plate').value = 'KKA-8921';
+      document.getElementById('insp_license_date').value = '2021-08-15';
+      document.getElementById('insp_limit_passengers').value = 43;
+      document.getElementById('insp_actual_passengers').value = 38;
+      document.getElementById('insp_driver_name').value = '張先生';
+      document.getElementById('insp_driver_id').value = 'F123456789';
+      document.getElementById('insp_location').value = '文化路一段與民權路交叉路口';
+      setNowInspectionTime();
+      selectAllChecks(true);
+    }
+
+    function resetInspectionForm() {
+      document.getElementById('inspectionForm').reset();
+      handleOperatorSelectChange();
+      setNowInspectionTime();
+      selectAllChecks(true);
+      showToast("表單已重置", "info");
+    }
+
+    function populatePdfTemplateData(data) {
+      document.getElementById('pdf_school').textContent = data.school || '-';
+      document.getElementById('pdf_time').textContent = data.formattedTime || data.datetime || '-';
+      document.getElementById('pdf_location').textContent = data.location || '-';
+      document.getElementById('pdf_inspectors').textContent = '新北市教育局、公路局監理所、警察局聯合小組';
+      document.getElementById('pdf_operator').textContent = data.operator || '-';
+      document.getElementById('pdf_vehicle_type').textContent = data.vehicle_type || '校車';
+      document.getElementById('pdf_plate').textContent = data.plate || '-';
+      document.getElementById('pdf_license_date').textContent = data.license_date || '-';
+      document.getElementById('pdf_seat_type').textContent = (data.seat_type || '非字') + '型座椅';
+      document.getElementById('pdf_passengers').textContent = `法定限載：${data.limit_passengers}人，實載：${data.actual_passengers}人`;
+      document.getElementById('pdf_driver_name').textContent = data.driver_name || '-';
+      document.getElementById('pdf_driver_id').textContent = data.driver_id || '-';
+      document.getElementById('pdf_license_type').textContent = (data.license_type || '職業') + '駕照';
+      document.getElementById('pdf_escort').textContent = `${data.escort_status} (${data.escort_name})`;
+
+      const chk = data.checks || {};
+      document.getElementById('pdf_chk_extinguisher').textContent = chk.extinguisher ? '☑ 合格' : '☒ 不合格';
+      document.getElementById('pdf_chk_door').textContent = chk.door ? '☑ 合格' : '☒ 不合格';
+      document.getElementById('pdf_chk_alarm').textContent = chk.alarm ? '☑ 合格' : '☒ 不合格';
+      document.getElementById('pdf_chk_dashcam').textContent = chk.dashcam ? '☑ 合格' : '☒ 不合格';
+
+      const isCompliant = (!data.violations || data.violations.length === 0);
+      const resStatusEl = document.getElementById('pdf_result_status');
+      if (resStatusEl) {
+        resStatusEl.textContent = isCompliant ? '全項合格' : '違規列管改善';
+        resStatusEl.style.color = isCompliant ? '#047857' : '#e11d48';
+      }
+      document.getElementById('pdf_violations_list').textContent = isCompliant ? '無任何違規' : data.violations.join('、');
+      document.getElementById('pdf_remarks').textContent = data.remarks || '現場查驗完畢。';
+      document.getElementById('pdf_gen_timestamp').textContent = new Date().toLocaleString('zh-TW');
+    }
+
+    function previewAndDownloadCurrentPDF() {
+      const opSelect = document.getElementById('insp_operator');
+      let op = opSelect.value;
+      if (op === '其他通運業者') op = document.getElementById('insp_operator_custom').value.trim();
+
+      const current = {
+        school: document.getElementById('insp_school').value || '未填寫學校',
+        formattedTime: document.getElementById('insp_datetime').value.replace('T', ' '),
+        location: document.getElementById('insp_location').value || '現場指定路口',
+        operator: op || '未填寫業者',
+        vehicle_type: document.getElementById('insp_vehicle_type').value,
+        plate: document.getElementById('insp_plate').value.toUpperCase() || 'ABC-0000',
+        license_date: document.getElementById('insp_license_date').value || '2022-01-01',
+        seat_type: document.querySelector('input[name="seat_type"]:checked')?.value || '非字',
+        limit_passengers: document.getElementById('insp_limit_passengers').value || 43,
+        actual_passengers: document.getElementById('insp_actual_passengers').value || 0,
+        driver_name: document.getElementById('insp_driver_name').value || '駕駛員',
+        driver_id: document.getElementById('insp_driver_id').value || 'F123***789',
+        license_type: document.querySelector('input[name="license_type"]:checked')?.value || '職業',
+        escort_status: document.getElementById('insp_escort_status').value,
+        escort_name: document.getElementById('insp_escort_name').value || '無',
+        checks: {
+          extinguisher: document.getElementById('check_extinguisher').checked,
+          door: document.getElementById('check_door').checked,
+          alarm: document.getElementById('check_alarm').checked,
+          dashcam: document.getElementById('check_dashcam').checked
+        },
+        violations: Array.from(document.querySelectorAll('input[name="violations"]:checked')).map(c => c.value),
+        remarks: document.getElementById('insp_remarks').value || '查驗完畢'
+      };
+
+      populatePdfTemplateData(current);
+      showToast("正在產製 PDF 稽查紀錄單...", "info");
+
+      const element = document.getElementById('singleInspectionPdfTemplate');
+      html2pdf().set({
+        margin: [6, 6, 6, 6],
+        filename: `學生交通車聯合稽查紀錄表_${current.plate}_${current.school}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    }
+
+    function downloadRecordAsPDF(id) {
+      const rec = inspectionsData.find(x => x.id === id);
+      if (!rec) return;
+      populatePdfTemplateData(rec);
+      const element = document.getElementById('singleInspectionPdfTemplate');
+      html2pdf().set({
+        margin: [6, 6, 6, 6],
+        filename: `學生交通車聯合稽查紀錄表_${rec.plate || '車號'}_${rec.school}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setNowInspectionTime();
+      renderAllStatisticsTables();
+      renderRecentInspectionsTable();
+      renderDashboard();
+      renderRegulationsList();
+      handleOperatorSelectChange();
     });
-
-    // 護眼紙質色調切換
-    let isPaperTheme = false;
-    function togglePaperTheme() {
-      isPaperTheme = !isPaperTheme;
-      const body = document.body;
-      const btn = document.getElementById('themeToggleBtn');
-      if (isPaperTheme) {
-        body.classList.add('theme-paper');
-        btn.innerHTML = '<i class="ph-bold ph-sun text-lg text-amber-600"></i>';
-        btn.classList.add('bg-amber-100', 'border-amber-300');
-      } else {
-        body.classList.remove('theme-paper');
-        btn.innerHTML = '<i class="ph-bold ph-sun-dim text-lg"></i>';
-        btn.classList.remove('bg-amber-100', 'border-amber-300');
-      }
-    }
-
-    // 重點速讀模式（過濾次要細節段落，放大並高亮核心金句與表格）
-    let isSummaryMode = false;
-    function toggleSummaryMode() {
-      isSummaryMode = !isSummaryMode;
-      const body = document.body;
-      const btn = document.getElementById('toggleSummaryBtn');
-      const text = document.getElementById('summaryBtnText');
-
-      if (isSummaryMode) {
-        body.classList.add('summary-active');
-        btn.classList.remove('bg-amber-50', 'text-amber-900', 'border-amber-300');
-        btn.classList.add('bg-amber-600', 'text-white', 'border-amber-700', 'shadow-md');
-        text.innerText = '恢復完整文章';
-      } else {
-        body.classList.remove('summary-active');
-        btn.classList.remove('bg-amber-600', 'text-white', 'border-amber-700', 'shadow-md');
-        btn.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-300');
-        text.innerText = '重點速讀模式';
-      }
-    }
-
-    // 手機版導航抽屜開關
-    function toggleMobileNav() {
-      const nav = document.getElementById('mobileNav');
-      nav.classList.toggle('hidden');
-    }
   </script>
 </body>
 </html>
